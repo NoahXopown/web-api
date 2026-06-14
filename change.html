@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Change Menu — Astro CRM</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;touch-action:manipulation;}
+.page{padding:1.2rem 1rem 6rem;}
+.topbar{display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem;}
+.back{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.back i{font-size:.82rem;color:rgba(255,255,255,.55);}
+.tb-title{font-size:1rem;font-weight:700;}
+.tb-sub{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+.slabel{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.7rem;}
+
+/* tabs */
+.tabs{display:flex;background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.25rem;margin-bottom:1.2rem;gap:.25rem;}
+.tab{flex:1;padding:.52rem;text-align:center;border-radius:9px;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.3);transition:all .15s;}
+.tab.active{background:rgba(255,255,255,.08);color:#fff;}
+
+/* panels */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* change type grid */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:1rem;}
+.cc{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.85rem;transition:all .15s;position:relative;}
+.cc.sel{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.06);}
+.cc-ico{font-size:1.2rem;margin-bottom:.4rem;}
+.cc-name{font-size:.78rem;font-weight:700;}
+.cc-desc{font-size:.6rem;color:rgba(255,255,255,.28);margin-top:.12rem;}
+.cc-chk{position:absolute;top:.6rem;right:.6rem;width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(255,255,255,.15);}
+.cc.sel .cc-chk{background:#fff;border-color:#fff;}
+
+/* form */
+.fcard{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;}
+.fgroup{margin-bottom:.85rem;}
+.fgroup:last-of-type{margin-bottom:0;}
+.flabel{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.45rem;display:block;}
+.finput{width:100%;padding:.78rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:rgba(255,255,255,.2);}
+.finput::placeholder{color:rgba(255,255,255,.18);}
+.finput-pw{padding-right:2.8rem;}
+
+/* password eye */
+.pw-wrap{position:relative;}
+.pw-eye{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.22);font-size:.78rem;}
+
+/* type selector (account tab) */
+.type-row{display:flex;gap:.5rem;margin-bottom:.9rem;}
+.type-btn{flex:1;padding:.6rem;border-radius:9px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);color:rgba(255,255,255,.3);font-size:.72rem;font-weight:700;text-align:center;transition:all .15s;}
+.type-btn.active{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);color:#fff;}
+
+/* result */
+.result{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:1rem;margin-bottom:1rem;display:none;}
+.result.show{display:block;}
+.result.ok{border-color:rgba(34,197,94,.2);}
+.result.fail{border-color:rgba(239,68,68,.2);}
+.res-title{font-size:.85rem;font-weight:700;}
+.result.ok .res-title{color:#22c55e;}
+.result.fail .res-title{color:#ef4444;}
+.res-desc{font-size:.72rem;color:rgba(255,255,255,.3);margin-top:.25rem;}
+
+/* send btn */
+.btn-send{width:100%;padding:.88rem;background:#fff;border:none;border-radius:10px;color:#0a0a0a;font-size:.75rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;transition:opacity .15s;}
+.btn-send:active{opacity:.8;}
+.btn-send:disabled{opacity:.3;}
+
+/* account card */
+.acc-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;}
+.acc-header{display:flex;align-items:center;gap:.8rem;padding:.8rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:11px;margin-bottom:1rem;}
+.acc-ava{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;}
+.acc-ava i{font-size:1rem;color:rgba(255,255,255,.4);}
+.acc-uname{font-size:.85rem;font-weight:700;}
+.acc-role{font-size:.6rem;color:rgba(255,255,255,.3);margin-top:.1rem;text-transform:uppercase;letter-spacing:1px;}
+
+/* security protocol */
+.sec-proto{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:.88rem 1rem;margin-top:1rem;}
+.sec-title{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.55rem;display:flex;align-items:center;gap:.4rem;}
+.sec-title i{font-size:.65rem;}
+.sec-item{font-size:.68rem;color:rgba(255,255,255,.3);margin-bottom:.3rem;display:flex;align-items:center;gap:.45rem;}
+.sec-item i{font-size:.6rem;color:rgba(255,255,255,.2);}
+
+/* navbar */
+.navbar{position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.15rem;background:rgba(14,14,14,.97);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:.42rem .45rem;z-index:100;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:.16rem;padding:.38rem .6rem;border-radius:10px;color:rgba(255,255,255,.28);text-decoration:none;min-width:40px;}
+.ni.active{color:#fff;background:rgba(255,255,255,.09);}
+.ni i{font-size:.92rem;}
+.ni span{font-size:.5rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(16,16,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.62rem 1.1rem;font-size:.8rem;z-index:999;transition:transform .22s;backdrop-filter:blur(20px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="page">
+
+  <div class="topbar">
+    <a class="back" href="/dashboard"><i class="fa-solid fa-chevron-left"></i></a>
+    <div><div class="tb-title">Change Menu</div><div class="tb-sub">Ubah profil WA & kredensial akun</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tabWa" onclick="switchTab('wa')">WA Target</div>
+    <div class="tab" id="tabAccount" onclick="switchTab('account')">Akun Saya</div>
+  </div>
+
+  <!-- ══ WA TARGET PANEL ══ -->
+  <div class="panel active" id="panelWa">
+    <div class="slabel">Pilih Tipe Perubahan</div>
+    <div class="cg">
+      <div class="cc" onclick="selChange('name')">
+        <div class="cc-chk"></div>
+        <div class="cc-ico"><i class="fa-solid fa-pen" style="font-size:1rem;color:rgba(255,255,255,.5);"></i></div>
+        <div class="cc-name">Ganti Nama</div>
+        <div class="cc-desc">Ubah display name WA</div>
+      </div>
+      <div class="cc" onclick="selChange('bio')">
+        <div class="cc-chk"></div>
+        <div class="cc-ico"><i class="fa-solid fa-align-left" style="font-size:1rem;color:rgba(255,255,255,.5);"></i></div>
+        <div class="cc-name">Ganti Bio</div>
+        <div class="cc-desc">Ubah status / about</div>
+      </div>
+      <div class="cc" onclick="selChange('photo')">
+        <div class="cc-chk"></div>
+        <div class="cc-ico"><i class="fa-solid fa-image" style="font-size:1rem;color:rgba(255,255,255,.5);"></i></div>
+        <div class="cc-name">Ganti Foto</div>
+        <div class="cc-desc">Ubah foto profil</div>
+      </div>
+      <div class="cc" onclick="selChange('block')">
+        <div class="cc-chk"></div>
+        <div class="cc-ico"><i class="fa-solid fa-ban" style="font-size:1rem;color:#ef4444;"></i></div>
+        <div class="cc-name">Block</div>
+        <div class="cc-desc">Block nomor target</div>
+      </div>
+    </div>
+
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">Nomor Target</label>
+        <input class="finput" type="tel" id="waTarget" placeholder="628xxxxxxxxxx" inputmode="tel">
+      </div>
+      <div class="fgroup" id="waValueGroup">
+        <label class="flabel" id="waValueLabel">Nilai Baru</label>
+        <input class="finput" type="text" id="waValue" placeholder="Masukkan nilai...">
+      </div>
+    </div>
+
+    <div class="result" id="waResult">
+      <div class="res-title" id="waResTitle"></div>
+      <div class="res-desc" id="waResDesc"></div>
+    </div>
+
+    <button class="btn-send" onclick="sendChange()">KIRIM PERUBAHAN</button>
+  </div>
+
+  <!-- ══ ACCOUNT PANEL ══ -->
+  <div class="panel" id="panelAccount">
+
+    <div class="acc-card">
+      <div class="acc-header">
+        <div class="acc-ava"><i class="fa-solid fa-user"></i></div>
+        <div>
+          <div class="acc-uname" id="accUname">Loading...</div>
+          <div class="acc-role" id="accRole">member</div>
+        </div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-btn active" id="typeBtnPass" onclick="switchType('password')">
+          <i class="fa-solid fa-lock" style="margin-right:.35rem;"></i> Password
+        </div>
+        <div class="type-btn" id="typeBtnUser" onclick="switchType('username')">
+          <i class="fa-solid fa-user" style="margin-right:.35rem;"></i> Username
+        </div>
+      </div>
+
+      <!-- PASSWORD FORM -->
+      <div id="formPass">
+        <div class="fgroup">
+          <label class="flabel">Password Saat Ini</label>
+          <div class="pw-wrap">
+            <input class="finput finput-pw" type="password" id="oldPass" placeholder="Password lama">
+            <i class="fa-regular fa-eye pw-eye" onclick="togglePw('oldPass',this)"></i>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Password Baru</label>
+          <div class="pw-wrap">
+            <input class="finput finput-pw" type="password" id="newPass" placeholder="Min 6 karakter">
+            <i class="fa-regular fa-eye pw-eye" onclick="togglePw('newPass',this)"></i>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Konfirmasi Password Baru</label>
+          <div class="pw-wrap">
+            <input class="finput finput-pw" type="password" id="confirmPass" placeholder="Ulangi password baru">
+            <i class="fa-regular fa-eye pw-eye" onclick="togglePw('confirmPass',this)"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERNAME FORM -->
+      <div id="formUser" style="display:none;">
+        <div class="fgroup">
+          <label class="flabel">Konfirmasi Password</label>
+          <div class="pw-wrap">
+            <input class="finput finput-pw" type="password" id="verifyPass" placeholder="Password saat ini">
+            <i class="fa-regular fa-eye pw-eye" onclick="togglePw('verifyPass',this)"></i>
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Username Baru</label>
+          <input class="finput" type="text" id="newUsername" placeholder="Min 3 karakter" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <div class="result" id="accResult">
+      <div class="res-title" id="accResTitle"></div>
+      <div class="res-desc" id="accResDesc"></div>
+    </div>
+
+    <button class="btn-send" id="accBtn" onclick="saveCredential()">CHANGE PASSWORD</button>
+
+    <div class="sec-proto">
+      <div class="sec-title"><i class="fa-solid fa-shield-halved"></i> SECURITY PROTOCOL</div>
+      <div class="sec-item"><i class="fa-solid fa-circle-dot"></i> Min length: 6 characters</div>
+      <div class="sec-item"><i class="fa-solid fa-circle-dot"></i> Perubahan berlaku langsung</div>
+      <div class="sec-item"><i class="fa-solid fa-circle-dot"></i> Session tetap aktif setelah ubah password</div>
+      <div class="sec-item"><i class="fa-solid fa-circle-dot"></i> Ubah username memerlukan login ulang</div>
+    </div>
+  </div>
+
+</div>
+<nav class="navbar" id="nb"></nav>
+
+<script>
+const NAVS = [
+  { h:'/dashboard', l:'Home',   i:'fa-solid fa-house' },
+  { h:'/bugsender', l:'Bug',    i:'fa-brands fa-whatsapp' },
+  { h:'/ddos',      l:'DDoS',   i:'fa-solid fa-shield-halved' },
+  { h:'/toolscain', l:'Tools',  i:'fa-solid fa-wrench' },
+  { h:'/ai',        l:'AI',     i:'fa-solid fa-brain' },
+  { h:'/addsender', l:'Sender', i:'fa-solid fa-mobile-screen' },
+  { h:'/change',    l:'More',   i:'fa-solid fa-bars' },
+];
+document.getElementById('nb').innerHTML = NAVS.map(n =>
+  `<a class="ni${n.h===location.pathname?' active':''}" href="${n.h}"><i class="${n.i}"></i><span>${n.l}</span></a>`
+).join('');
+
+let selChangeType = null;
+let accType       = 'password';
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function switchTab(tab) {
+  document.getElementById('tabWa').className      = 'tab' + (tab === 'wa'      ? ' active' : '');
+  document.getElementById('tabAccount').className = 'tab' + (tab === 'account' ? ' active' : '');
+  document.getElementById('panelWa').className      = 'panel' + (tab === 'wa'      ? ' active' : '');
+  document.getElementById('panelAccount').className = 'panel' + (tab === 'account' ? ' active' : '');
+}
+
+function selChange(type) {
+  selChangeType = type;
+  document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
+  event.currentTarget.classList.add('sel');
+  const labels = { name: 'Nama Baru', bio: 'Bio / Status Baru', photo: 'URL Foto Profil', block: 'Konfirmasi' };
+  document.getElementById('waValueLabel').textContent = labels[type] || 'Nilai Baru';
+  document.getElementById('waValueGroup').style.display = type === 'block' ? 'none' : 'block';
+}
+
+async function sendChange() {
+  const target = document.getElementById('waTarget').value.trim();
+  const value  = document.getElementById('waValue').value.trim();
+  if (!target) { toast('Masukkan nomor target'); return; }
+  if (!selChangeType) { toast('Pilih tipe perubahan'); return; }
+  try {
+    const d = await fetch('/api/change/wa', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ number: target, type: selChangeType, value }),
+    }).then(r => r.json());
+    const rc = document.getElementById('waResult');
+    if (d.success) {
+      rc.className = 'result show ok';
+      document.getElementById('waResTitle').textContent = 'Berhasil!';
+      document.getElementById('waResDesc').textContent  = d.message || '';
+    } else {
+      rc.className = 'result show fail';
+      document.getElementById('waResTitle').textContent = 'Gagal';
+      document.getElementById('waResDesc').textContent  = d.message || 'Terjadi kesalahan';
+    }
+  } catch { toast('Koneksi gagal'); }
+}
+
+function switchType(type) {
+  accType = type;
+  document.getElementById('typeBtnPass').className = 'type-btn' + (type === 'password' ? ' active' : '');
+  document.getElementById('typeBtnUser').className = 'type-btn' + (type === 'username' ? ' active' : '');
+  document.getElementById('formPass').style.display = type === 'password' ? 'block' : 'none';
+  document.getElementById('formUser').style.display = type === 'username' ? 'block' : 'none';
+  const btn = document.getElementById('accBtn');
+  btn.textContent = type === 'password' ? 'CHANGE PASSWORD' : 'CHANGE USERNAME';
+}
+
+function togglePw(id, el) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; el.className = 'fa-regular fa-eye-slash pw-eye'; }
+  else { inp.type = 'password'; el.className = 'fa-regular fa-eye pw-eye'; }
+}
+
+async function saveCredential() {
+  let body = {};
+  if (accType === 'password') {
+    const o = document.getElementById('oldPass').value;
+    const n = document.getElementById('newPass').value;
+    const c = document.getElementById('confirmPass').value;
+    if (!o || !n || !c) { toast('Semua field wajib diisi'); return; }
+    body = { type: 'password', oldValue: o, newValue: n, confirmValue: c };
+  } else {
+    const p = document.getElementById('verifyPass').value;
+    const u = document.getElementById('newUsername').value.trim();
+    if (!p || !u) { toast('Semua field wajib diisi'); return; }
+    body = { type: 'username', oldValue: p, newValue: u };
+  }
+
+  const btn = document.getElementById('accBtn');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+  try {
+    const d = await fetch('/api/change-credentials', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(body),
+    }).then(r => r.json());
+
+    const rc = document.getElementById('accResult');
+    if (d.success) {
+      rc.className = 'result show ok';
+      document.getElementById('accResTitle').textContent = d.message || 'Berhasil!';
+      document.getElementById('accResDesc').textContent  = accType === 'username'
+        ? 'Silakan login ulang dengan username baru.'
+        : 'Password berhasil diperbarui.';
+      if (accType === 'username') {
+        localStorage.removeItem('_as');
+        setTimeout(() => location.href = '/', 2000);
+      }
+    } else {
+      rc.className = 'result show fail';
+      document.getElementById('accResTitle').textContent = 'Gagal';
+      document.getElementById('accResDesc').textContent  = d.message || 'Terjadi kesalahan';
+    }
+  } catch { toast('Koneksi gagal'); }
+
+  btn.disabled = false;
+  btn.textContent = accType === 'password' ? 'CHANGE PASSWORD' : 'CHANGE USERNAME';
+}
+
+async function init() {
+  const s = await fetch('/api/session').then(r => r.json());
+  if (!s.loggedIn) { location.href = '/'; return; }
+  document.getElementById('accUname').textContent = s.username || 'User';
+  document.getElementById('accRole').textContent  = (s.role || 'member').toUpperCase();
+  if (location.search.includes('tab=account')) switchTab('account');
+}
+init();
+</script>
+</body>
+</html>

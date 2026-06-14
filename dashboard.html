@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Dashboard — Astro CRM</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;touch-action:manipulation;}
+.page{padding:1.2rem 1rem 6rem;}
+
+/* topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;}
+.tb-left .greet{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.tb-left .uname{font-size:1.05rem;font-weight:700;margin-top:.1rem;}
+.tb-right{display:flex;align-items:center;gap:.55rem;}
+.rb{display:inline-flex;align-items:center;font-size:.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:.22rem .65rem;border-radius:5px;}
+.rb.owner{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.22);color:#ef4444;}
+.rb.member{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);}
+.notif{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;}
+.notif i{font-size:.8rem;color:rgba(255,255,255,.35);}
+
+/* hero */
+.hero{border-radius:16px;overflow:hidden;height:165px;position:relative;margin-bottom:1.2rem;}
+.hero img{width:100%;height:100%;object-fit:cover;display:block;}
+.hero-ov{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,10,.88) 0%,rgba(10,10,10,.15) 100%);}
+.hero-body{position:absolute;inset:0;padding:1.2rem 1.3rem;display:flex;flex-direction:column;justify-content:flex-end;}
+.hero-eyebrow{font-size:.58rem;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:.3rem;}
+.hero-title{font-size:1.05rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;}
+.hero-sub{font-size:.65rem;color:rgba(255,255,255,.38);margin-top:.2rem;}
+.wa-pill{position:absolute;top:1rem;right:1rem;display:flex;align-items:center;gap:.35rem;padding:.28rem .72rem;border-radius:20px;font-size:.6rem;font-weight:700;letter-spacing:1px;}
+.wa-pill.on{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#22c55e;}
+.wa-pill.off{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#ef4444;}
+.wa-dot{width:6px;height:6px;border-radius:50%;}
+.wa-pill.on .wa-dot{background:#22c55e;box-shadow:0 0 5px #22c55e;}
+.wa-pill.off .wa-dot{background:#ef4444;}
+
+/* stats 2x2 */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem;}
+.sc{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:.9rem 1rem;}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.55rem;}
+.sc-icon{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;}
+.sc-icon i{font-size:.75rem;color:rgba(255,255,255,.38);}
+.sc-val{font-size:1.4rem;font-weight:800;letter-spacing:-.5px;}
+.sc-lbl{font-size:.6rem;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:.1rem;}
+
+/* license */
+.license-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.1rem;display:flex;align-items:center;gap:.9rem;margin-bottom:1.2rem;}
+.lring{position:relative;width:52px;height:52px;flex-shrink:0;}
+.lring svg{transform:rotate(-90deg);}
+.lring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;}
+.lic-info .lic-title{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.lic-info .lic-id{font-size:.88rem;font-weight:700;letter-spacing:1px;margin-top:.15rem;}
+.lic-info .lic-status{font-size:.62rem;color:#22c55e;margin-top:.25rem;display:flex;align-items:center;gap:.3rem;}
+
+/* actions row */
+.act-row{display:flex;gap:.55rem;margin-bottom:1.2rem;}
+.act-btn{flex:1;padding:.72rem;background:#111;border:1px solid rgba(255,255,255,.07);border-radius:10px;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;gap:.45rem;}
+.act-btn i{font-size:.78rem;}
+.act-btn.danger{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.18);color:#ef4444;}
+
+/* section label */
+.slabel{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.7rem;}
+
+/* resources */
+.res-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1.2rem;}
+.res-row{margin-bottom:.8rem;}
+.res-row:last-child{margin-bottom:0;}
+.res-head{display:flex;justify-content:space-between;margin-bottom:.38rem;}
+.res-name{font-size:.68rem;color:rgba(255,255,255,.32);}
+.res-num{font-size:.68rem;font-weight:700;}
+.res-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.res-fill{height:100%;background:rgba(255,255,255,.55);border-radius:2px;transition:width .8s ease;}
+
+/* update card */
+.update-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:1.2rem;}
+.upd-img{width:100%;height:130px;object-fit:cover;display:block;}
+.upd-body{padding:.9rem 1.1rem;}
+.upd-eyebrow{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);}
+.upd-title{font-size:.92rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem;}
+.upd-by{font-size:.65rem;color:rgba(255,255,255,.3);margin-top:.2rem;}
+
+/* menu list */
+.menu-list{display:flex;flex-direction:column;gap:.5rem;}
+.mi{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:.88rem 1.1rem;display:flex;align-items:center;gap:.85rem;text-decoration:none;}
+.mi-ico{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mi-ico i{font-size:.85rem;color:rgba(255,255,255,.45);}
+.mi-title{font-size:.82rem;font-weight:600;}
+.mi-sub{font-size:.64rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+.mi-arr{margin-left:auto;color:rgba(255,255,255,.15);}
+.mi-arr i{font-size:.7rem;}
+
+/* navbar */
+.navbar{position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.15rem;background:rgba(14,14,14,.97);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:.42rem .45rem;z-index:100;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:.16rem;padding:.38rem .6rem;border-radius:10px;color:rgba(255,255,255,.28);text-decoration:none;min-width:40px;}
+.ni.active{color:#fff;background:rgba(255,255,255,.09);}
+.ni i{font-size:.92rem;}
+.ni span{font-size:.5rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+
+/* toast */
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(16,16,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.62rem 1.1rem;font-size:.8rem;z-index:999;transition:transform .22s;backdrop-filter:blur(20px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="page">
+
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="greet">Hello,</div>
+      <div class="uname" id="uname">...</div>
+    </div>
+    <div class="tb-right">
+      <span class="rb owner" id="roleBadge">OWNER</span>
+      <div class="notif"><i class="fa-regular fa-bell"></i></div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <img src="https://files.catbox.moe/yz3gtd.jpg" alt="">
+    <div class="hero-ov"></div>
+    <div class="hero-body">
+      <div class="hero-eyebrow">WhatsApp Attack</div>
+      <div class="hero-title">ASTRO CRM v3.0</div>
+      <div class="hero-sub">Premium Tools Panel</div>
+    </div>
+    <div class="wa-pill off" id="waPill">
+      <div class="wa-dot"></div>
+      <span id="waText">Offline</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="sc">
+      <div class="sc-top"><div class="sc-icon"><i class="fa-solid fa-bolt"></i></div></div>
+      <div class="sc-val" id="sAccounts">0</div>
+      <div class="sc-lbl">Online Users</div>
+    </div>
+    <div class="sc">
+      <div class="sc-top"><div class="sc-icon"><i class="fa-solid fa-microchip"></i></div></div>
+      <div class="sc-val" id="sCores">0</div>
+      <div class="sc-lbl">Active Cores</div>
+    </div>
+  </div>
+
+  <div class="license-card">
+    <div class="lring">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="4"/>
+        <circle cx="26" cy="26" r="21" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="4"
+          stroke-dasharray="131.9" stroke-dashoffset="0" stroke-linecap="round" id="lArc"/>
+      </svg>
+      <div class="lring-pct">100%</div>
+    </div>
+    <div class="lic-info">
+      <div class="lic-title">License Status:</div>
+      <div class="lic-id">9999-99-99</div>
+      <div class="lic-status"><i class="fa-solid fa-circle-check"></i> Active Protection Enabled</div>
+    </div>
+  </div>
+
+  <div class="act-row">
+    <div class="act-btn" onclick="location.href='/change?tab=account'">
+      <i class="fa-brands fa-whatsapp"></i> PASSWORD
+    </div>
+    <div class="act-btn danger" onclick="doLogout()">
+      <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
+    </div>
+  </div>
+
+  <div class="slabel" style="margin-bottom:.75rem;">Latest Updates</div>
+  <div class="update-card">
+    <img class="upd-img" src="https://files.catbox.moe/yz3gtd.jpg" alt="">
+    <div class="upd-body">
+      <div class="upd-eyebrow">Latest Update</div>
+      <div class="upd-title">ASTRO CRM v3.0</div>
+      <div class="upd-by">Developer By @JooModdss</div>
+    </div>
+  </div>
+
+  <div class="slabel">System Resources</div>
+  <div class="res-card">
+    <div class="res-row">
+      <div class="res-head"><span class="res-name">CPU Usage</span><span class="res-num" id="rCpu">—</span></div>
+      <div class="res-bar"><div class="res-fill" id="rCpuBar" style="width:0%"></div></div>
+    </div>
+    <div class="res-row">
+      <div class="res-head"><span class="res-name">Memory</span><span class="res-num" id="rMem">—</span></div>
+      <div class="res-bar"><div class="res-fill" id="rMemBar" style="width:0%"></div></div>
+    </div>
+    <div class="res-row">
+      <div class="res-head"><span class="res-name">Uptime</span><span class="res-num" id="rUp">—</span></div>
+      <div class="res-bar"><div class="res-fill" style="width:100%"></div></div>
+    </div>
+  </div>
+
+  <div class="slabel">Navigation</div>
+  <div class="menu-list">
+    <a class="mi" href="/bugsender">
+      <div class="mi-ico"><i class="fa-solid fa-bolt"></i></div>
+      <div><div class="mi-title">Bug Sender</div><div class="mi-sub">Send WA bugs to target</div></div>
+      <div class="mi-arr"><i class="fa-solid fa-chevron-right"></i></div>
+    </a>
+    <a class="mi" href="/ddos">
+      <div class="mi-ico"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="mi-title">DDoS Panel</div><div class="mi-sub">Layer 4/7 via botnet methods</div></div>
+      <div class="mi-arr"><i class="fa-solid fa-chevron-right"></i></div>
+    </a>
+    <a class="mi" href="/change">
+      <div class="mi-ico"><i class="fa-solid fa-shuffle"></i></div>
+      <div><div class="mi-title">Change Menu</div><div class="mi-sub">Modify WA & credentials</div></div>
+      <div class="mi-arr"><i class="fa-solid fa-chevron-right"></i></div>
+    </a>
+    <a class="mi" href="/toolscain">
+      <div class="mi-ico"><i class="fa-solid fa-wrench"></i></div>
+      <div><div class="mi-title">Advanced Toolkits</div><div class="mi-sub">DDoS, OSINT, Encrypt, Media</div></div>
+      <div class="mi-arr"><i class="fa-solid fa-chevron-right"></i></div>
+    </a>
+    <a class="mi" href="/ai">
+      <div class="mi-ico"><i class="fa-solid fa-brain"></i></div>
+      <div><div class="mi-title">AI Assistant</div><div class="mi-sub">ChatGPT & WormGPT unfiltered</div></div>
+      <div class="mi-arr"><i class="fa-solid fa-chevron-right"></i></div>
+    </a>
+    <a class="mi" href="/addsender">
+      <div class="mi-ico"><i class="fa-solid fa-mobile-screen"></i></div>
+      <div><div class="mi-title">Add Sender</div><div class="mi-sub">Manage global & personal WA</div></div>
+      <div class="mi-arr"><i class="fa-solid fa-chevron-right"></i></div>
+    </a>
+  </div>
+</div>
+
+<nav class="navbar" id="nb"></nav>
+
+<script>
+const NAVS = [
+  { h:'/dashboard', l:'Home',   i:'fa-solid fa-house' },
+  { h:'/bugsender', l:'Bug',    i:'fa-brands fa-whatsapp' },
+  { h:'/ddos',      l:'DDoS',   i:'fa-solid fa-shield-halved' },
+  { h:'/toolscain', l:'Tools',  i:'fa-solid fa-wrench' },
+  { h:'/ai',        l:'AI',     i:'fa-solid fa-brain' },
+  { h:'/addsender', l:'Sender', i:'fa-solid fa-mobile-screen' },
+  { h:'/change',    l:'More',   i:'fa-solid fa-bars' },
+];
+document.getElementById('nb').innerHTML = NAVS.map(n =>
+  `<a class="ni${n.h===location.pathname?' active':''}" href="${n.h}"><i class="${n.i}"></i><span>${n.l}</span></a>`
+).join('');
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2400);
+}
+
+function fmtB(b) {
+  if (b < 1048576) return (b/1024).toFixed(0)+'KB';
+  return (b/1048576).toFixed(0)+'MB';
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  localStorage.removeItem('_as');
+  location.href = '/';
+}
+
+async function loadStats() {
+  try {
+    const d = await fetch('/api/stats').then(r => r.json());
+    document.getElementById('sAccounts').textContent = d.accounts || 0;
+    document.getElementById('sCores').textContent = d.cpu?.cores || 0;
+    document.getElementById('rCpu').textContent = (d.cpu?.usage || 0) + '%';
+    document.getElementById('rCpuBar').style.width = Math.min(d.cpu?.usage || 0, 100) + '%';
+    document.getElementById('rMem').textContent = fmtB(d.mem?.used||0)+'/'+fmtB(d.mem?.total||0);
+    document.getElementById('rMemBar').style.width = (d.mem?.pct || 0) + '%';
+    document.getElementById('rUp').textContent = d.uptime || '—';
+    const pill = document.getElementById('waPill');
+    const waT = document.getElementById('waText');
+    if (d.whatsapp) {
+      pill.className = 'wa-pill on';
+      waT.textContent = d.waUser ? d.waUser.split('@')[0] : 'Online';
+    } else {
+      pill.className = 'wa-pill off';
+      waT.textContent = 'Offline';
+    }
+  } catch {}
+}
+
+async function init() {
+  const s = await fetch('/api/session').then(r => r.json());
+  if (!s.loggedIn) { location.href = '/'; return; }
+  document.getElementById('uname').textContent = s.username || 'User';
+  const rb = document.getElementById('roleBadge');
+  rb.textContent = (s.role || 'member').toUpperCase();
+  rb.className = 'rb ' + (s.role === 'owner' ? 'owner' : 'member');
+  await loadStats();
+  setInterval(loadStats, 15000);
+}
+init();
+</script>
+</body>
+</html>

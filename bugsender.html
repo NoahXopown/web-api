@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Bug Sender — Astro CRM</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;touch-action:manipulation;}
+.page{padding:1.2rem 1rem 6rem;}
+.topbar{display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem;}
+.back{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.back i{font-size:.82rem;color:rgba(255,255,255,.55);}
+.tb-title{font-size:1rem;font-weight:700;}
+.tb-sub{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+
+/* sender tabs */
+.stabs{display:flex;gap:.5rem;margin-bottom:1.1rem;}
+.stab{flex:1;padding:.6rem;text-align:center;border-radius:11px;border:1px solid rgba(255,255,255,.07);background:#111;font-size:.72rem;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.32);transition:all .15s;}
+.stab.active{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff;}
+
+/* sender info */
+.sinfo{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1rem;}
+.si-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;}
+.si-row:last-child{margin-bottom:0;}
+.si-lbl{font-size:.65rem;color:rgba(255,255,255,.32);}
+.si-val{font-size:.72rem;font-weight:600;}
+.badge-on{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#22c55e;padding:.18rem .55rem;border-radius:5px;font-size:.6rem;font-weight:700;}
+.badge-off{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#ef4444;padding:.18rem .55rem;border-radius:5px;font-size:.6rem;font-weight:700;}
+.badge-warn{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);color:#eab308;padding:.18rem .55rem;border-radius:5px;font-size:.6rem;font-weight:700;}
+.usage-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-top:.55rem;}
+.usage-fill{height:100%;background:rgba(255,255,255,.45);border-radius:2px;transition:width .5s;}
+.usage-fill.danger{background:#ef4444;}
+
+/* form */
+.fcard{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;}
+.flabel{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.45rem;display:block;}
+.finput{width:100%;padding:.78rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:rgba(255,255,255,.2);}
+.finput::placeholder{color:rgba(255,255,255,.18);}
+
+/* bug grid */
+.slabel{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.7rem;}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:1rem;}
+.bcard{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.88rem;position:relative;transition:border-color .15s,background .15s;}
+.bcard.sel{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.06);}
+.bcard.disabled{opacity:.35;}
+.bcard-chk{position:absolute;top:.6rem;right:.6rem;width:17px;height:17px;border-radius:4px;border:1.5px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;}
+.bcard.sel .bcard-chk{background:#fff;border-color:#fff;}
+.bcard.sel .bcard-chk::after{content:'';display:block;width:4px;height:7px;border:1.5px solid #000;border-top:none;border-left:none;transform:rotate(45deg);margin-top:-1px;}
+.bcard-ico{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;margin-bottom:.5rem;}
+.bcard-ico i{font-size:.82rem;color:rgba(255,255,255,.5);}
+.bcard-name{font-size:.8rem;font-weight:700;}
+.bcard-desc{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.15rem;line-height:1.3;}
+.btag{display:inline-block;padding:.1rem .42rem;border-radius:4px;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:.35rem;}
+.btag.global{background:rgba(255,255,255,.07);color:rgba(255,255,255,.45);}
+.btag.personal{background:rgba(34,197,94,.08);color:#22c55e;}
+
+/* progress */
+.prog-wrap{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;display:none;}
+.prog-wrap.show{display:block;}
+.prog-title{font-size:.78rem;font-weight:600;margin-bottom:.65rem;}
+.prog-outer{background:rgba(255,255,255,.05);border-radius:3px;height:5px;overflow:hidden;margin-bottom:.45rem;}
+.prog-inner{height:100%;background:#fff;border-radius:3px;transition:width .35s ease;width:0;}
+.prog-status{font-size:.68rem;color:rgba(255,255,255,.32);}
+
+/* result */
+.result{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;display:none;}
+.result.show{display:block;}
+.result.ok{border-color:rgba(34,197,94,.2);}
+.result.fail{border-color:rgba(239,68,68,.2);}
+.result-ico{font-size:1.2rem;margin-bottom:.4rem;}
+.result-title{font-size:.85rem;font-weight:700;}
+.result.ok .result-title{color:#22c55e;}
+.result.fail .result-title{color:#ef4444;}
+.result-desc{font-size:.72rem;color:rgba(255,255,255,.32);margin-top:.25rem;line-height:1.5;}
+
+/* send btn */
+.btn-send{width:100%;padding:.92rem;background:#fff;border:none;border-radius:11px;color:#0a0a0a;font-size:.78rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;transition:opacity .15s;}
+.btn-send:active{opacity:.8;}
+.btn-send:disabled{opacity:.3;}
+
+/* navbar */
+.navbar{position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.15rem;background:rgba(14,14,14,.97);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:.42rem .45rem;z-index:100;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:.16rem;padding:.38rem .6rem;border-radius:10px;color:rgba(255,255,255,.28);text-decoration:none;min-width:40px;}
+.ni.active{color:#fff;background:rgba(255,255,255,.09);}
+.ni i{font-size:.92rem;}
+.ni span{font-size:.5rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(16,16,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.62rem 1.1rem;font-size:.8rem;z-index:999;transition:transform .22s;backdrop-filter:blur(20px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="page">
+
+  <div class="topbar">
+    <a class="back" href="/dashboard"><i class="fa-solid fa-chevron-left"></i></a>
+    <div><div class="tb-title">Manage Bug Sender</div><div class="tb-sub">Send WhatsApp bugs to target</div></div>
+  </div>
+
+  <div class="stabs">
+    <div class="stab active" id="tabG" onclick="switchSender('global')">
+      <i class="fa-solid fa-globe" style="margin-right:.35rem;font-size:.75rem;"></i> Global Sender
+    </div>
+    <div class="stab" id="tabP" onclick="switchSender('personal')">
+      <i class="fa-solid fa-mobile-screen" style="margin-right:.35rem;font-size:.75rem;"></i> Private Sender
+    </div>
+  </div>
+
+  <div class="sinfo">
+    <div class="si-row">
+      <span class="si-lbl">Status</span>
+      <span id="siStatus" class="badge-off">Offline</span>
+    </div>
+    <div class="si-row">
+      <span class="si-lbl">Nomor</span>
+      <span class="si-val" id="siNum">—</span>
+    </div>
+    <div class="si-row" id="siUsageRow" style="display:none;">
+      <span class="si-lbl">Penggunaan</span>
+      <span class="si-val" id="siUsage">0 / 5</span>
+    </div>
+    <div class="si-row" id="siCdRow" style="display:none;">
+      <span class="si-lbl">Cooldown</span>
+      <span class="badge-warn" id="siCd">—</span>
+    </div>
+    <div class="usage-bar" id="siUsageBar" style="display:none;">
+      <div class="usage-fill" id="siUsageFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="fcard">
+    <label class="flabel">Nomor Target</label>
+    <input class="finput" type="tel" id="targetNum" placeholder="628xxxxxxxxxx" inputmode="tel">
+  </div>
+
+  <div class="slabel">Pilih Bug</div>
+  <div class="bgrid" id="bugGrid">
+    <div class="bcard" id="bc_delay" onclick="selBug('delay')">
+      <div class="bcard-chk"></div>
+      <div class="bcard-ico"><i class="fa-solid fa-bolt" style="color:#eab308;"></i></div>
+      <div class="bcard-name">Delay Hard</div>
+      <div class="bcard-desc">EvilDelay + Invisible msg</div>
+      <span class="btag global">Global</span>
+    </div>
+    <div class="bcard" id="bc_ios" onclick="selBug('ios')">
+      <div class="bcard-chk"></div>
+      <div class="bcard-ico"><i class="fa-brands fa-apple" style="color:#a8a8a8;"></i></div>
+      <div class="bcard-name">iOS Crash</div>
+      <div class="bcard-desc">Crash WhatsApp iOS</div>
+      <span class="btag global">Global</span>
+    </div>
+    <div class="bcard disabled" id="bc_crash" onclick="selBug('crash')">
+      <div class="bcard-chk"></div>
+      <div class="bcard-ico"><i class="fa-solid fa-skull" style="color:#ef4444;"></i></div>
+      <div class="bcard-name">Crash Android</div>
+      <div class="bcard-desc">Force crash Android WA</div>
+      <span class="btag personal">Private</span>
+    </div>
+    <div class="bcard disabled" id="bc_phoenix" onclick="selBug('phoenix')">
+      <div class="bcard-chk"></div>
+      <div class="bcard-ico"><i class="fa-solid fa-fire" style="color:#f97316;"></i></div>
+      <div class="bcard-name">Phoenix</div>
+      <div class="bcard-desc">Multi-layer crash combo</div>
+      <span class="btag personal">Private</span>
+    </div>
+    <div class="bcard disabled" id="bc_system" onclick="selBug('system')">
+      <div class="bcard-chk"></div>
+      <div class="bcard-ico"><i class="fa-solid fa-desktop" style="color:#a855f7;"></i></div>
+      <div class="bcard-name">System UI</div>
+      <div class="bcard-desc">Blank + jixKntl combo x1000</div>
+      <span class="btag personal">Private</span>
+    </div>
+  </div>
+
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-title" id="progTitle">Mengirim bug...</div>
+    <div class="prog-outer"><div class="prog-inner" id="progBar"></div></div>
+    <div class="prog-status" id="progStatus">Memulai...</div>
+  </div>
+
+  <div class="result" id="resultBox">
+    <div class="result-ico" id="rIco"></div>
+    <div class="result-title" id="rTitle"></div>
+    <div class="result-desc" id="rDesc"></div>
+  </div>
+
+  <button class="btn-send" id="sendBtn" onclick="sendBug()">SEND BUG</button>
+</div>
+
+<nav class="navbar" id="nb"></nav>
+
+<script>
+const NAVS = [
+  { h:'/dashboard', l:'Home',   i:'fa-solid fa-house' },
+  { h:'/bugsender', l:'Bug',    i:'fa-brands fa-whatsapp' },
+  { h:'/ddos',      l:'DDoS',   i:'fa-solid fa-shield-halved' },
+  { h:'/toolscain', l:'Tools',  i:'fa-solid fa-wrench' },
+  { h:'/ai',        l:'AI',     i:'fa-solid fa-brain' },
+  { h:'/addsender', l:'Sender', i:'fa-solid fa-mobile-screen' },
+  { h:'/change',    l:'More',   i:'fa-solid fa-bars' },
+];
+document.getElementById('nb').innerHTML = NAVS.map(n =>
+  `<a class="ni${n.h===location.pathname?' active':''}" href="${n.h}"><i class="${n.i}"></i><span>${n.l}</span></a>`
+).join('');
+
+let curSender = 'global';
+let selBugId  = null;
+let sData     = {};
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function switchSender(type) {
+  curSender = type;
+  document.getElementById('tabG').className = 'stab' + (type === 'global' ? ' active' : '');
+  document.getElementById('tabP').className = 'stab' + (type === 'personal' ? ' active' : '');
+  selBugId = null;
+  document.querySelectorAll('.bcard').forEach(c => c.classList.remove('sel'));
+  const privateOnly = ['crash', 'phoenix', 'system'];
+  privateOnly.forEach(id => {
+    const el = document.getElementById('bc_' + id);
+    if (type === 'global') el.classList.add('disabled');
+    else el.classList.remove('disabled');
+  });
+  renderSenderInfo();
+}
+
+function selBug(id) {
+  const privateOnly = ['crash', 'phoenix', 'system'];
+  if (curSender === 'global' && privateOnly.includes(id)) {
+    toast('Bug ini hanya tersedia di Private Sender');
+    return;
+  }
+  selBugId = id;
+  document.querySelectorAll('.bcard').forEach(c => c.classList.remove('sel'));
+  document.getElementById('bc_' + id).classList.add('sel');
+}
+
+function renderSenderInfo() {
+  const isG    = curSender === 'global';
+  const sender = isG ? sData.global : sData.personal;
+  const st     = document.getElementById('siStatus');
+  const num    = document.getElementById('siNum');
+  const uRow   = document.getElementById('siUsageRow');
+  const cdRow  = document.getElementById('siCdRow');
+  const uBar   = document.getElementById('siUsageBar');
+
+  if (sender && sender.connected) {
+    st.className = 'badge-on'; st.textContent = 'Connected';
+    num.textContent = sender.number || '—';
+  } else {
+    st.className = 'badge-off'; st.textContent = 'Offline';
+    num.textContent = '—';
+  }
+
+  if (isG) {
+    uRow.style.display = 'flex';
+    const u = sData.globalUsage || 0;
+    document.getElementById('siUsage').textContent = u + ' / 5';
+    uBar.style.display = 'block';
+    const fill = document.getElementById('siUsageFill');
+    fill.style.width = ((u / 5) * 100) + '%';
+    fill.className = 'usage-fill' + (u >= 4 ? ' danger' : '');
+  } else {
+    uRow.style.display = 'none';
+    uBar.style.display = 'none';
+  }
+
+  const cd = sData.cooldown?.[curSender] || 0;
+  if (cd > 0) {
+    cdRow.style.display = 'flex';
+    document.getElementById('siCd').textContent = cd + 's';
+  } else {
+    cdRow.style.display = 'none';
+  }
+}
+
+async function loadSenderStatus() {
+  try {
+    const d = await fetch('/api/sender/status').then(r => r.json());
+    if (d.success) { sData = d; renderSenderInfo(); }
+  } catch {}
+}
+
+async function sendBug() {
+  const target = document.getElementById('targetNum').value.trim();
+  if (!target)   { toast('Masukkan nomor target'); return; }
+  if (!selBugId) { toast('Pilih jenis bug terlebih dahulu'); return; }
+
+  const btn = document.getElementById('sendBtn');
+  const pw  = document.getElementById('progWrap');
+  const pb  = document.getElementById('progBar');
+  const ps  = document.getElementById('progStatus');
+  const rb  = document.getElementById('resultBox');
+
+  btn.disabled = true;
+  pw.className = 'prog-wrap show';
+  rb.className = 'result';
+
+  const steps = [
+    'Inisialisasi koneksi...',
+    'Menyiapkan payload...',
+    'Mengirim ke target...',
+    'Memproses respons...',
+  ];
+  let step = 0;
+  const iv = setInterval(() => {
+    if (step < steps.length) {
+      pb.style.width = ((step + 1) / steps.length * 80) + '%';
+      ps.textContent = steps[step];
+      step++;
+    }
+  }, 600);
+
+  try {
+    const res = await fetch('/api/bug', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ number: target, bug: selBugId, senderType: curSender }),
+    });
+    const d = await res.json();
+    clearInterval(iv);
+    pb.style.width = '100%';
+    ps.textContent = 'Selesai!';
+    await new Promise(r => setTimeout(r, 400));
+    pw.className = 'prog-wrap';
+
+    if (d.success) {
+      rb.className = 'result show ok';
+      document.getElementById('rIco').textContent = '';
+      document.getElementById('rTitle').textContent = 'Bug Berhasil Dikirim!';
+      document.getElementById('rDesc').textContent = d.message || '';
+    } else {
+      rb.className = 'result show fail';
+      document.getElementById('rIco').textContent = '';
+      document.getElementById('rTitle').textContent = 'Gagal';
+      document.getElementById('rDesc').textContent = d.message || 'Terjadi kesalahan';
+    }
+    await loadSenderStatus();
+  } catch {
+    clearInterval(iv);
+    pw.className = 'prog-wrap';
+    toast('Koneksi gagal');
+  }
+  btn.disabled = false;
+}
+
+async function init() {
+  const s = await fetch('/api/session').then(r => r.json());
+  if (!s.loggedIn) { location.href = '/'; return; }
+  await loadSenderStatus();
+  setInterval(loadSenderStatus, 8000);
+}
+init();
+</script>
+</body>
+</html>

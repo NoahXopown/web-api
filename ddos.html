@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>DDoS Panel — Astro CRM</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;touch-action:manipulation;}
+.page{padding:1.2rem 1rem 6rem;}
+.topbar{display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem;}
+.back{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.back i{font-size:.82rem;color:rgba(255,255,255,.55);}
+.tb-title{font-size:1rem;font-weight:700;}
+.tb-sub{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+.slabel{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.7rem;}
+
+/* stats mini */
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;margin-bottom:1.2rem;}
+.sm{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.78rem .7rem;text-align:center;}
+.sm-val{font-size:1.15rem;font-weight:800;}
+.sm-lbl{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:.15rem;}
+
+/* form */
+.fcard{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;}
+.fgroup{margin-bottom:.85rem;}
+.fgroup:last-child{margin-bottom:0;}
+.flabel{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.45rem;display:block;}
+.finput{width:100%;padding:.78rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:rgba(255,255,255,.2);}
+.finput::placeholder{color:rgba(255,255,255,.18);}
+select.finput option{background:#111;color:#fff;}
+
+/* method grid */
+.mgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:1rem;}
+.mcard{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.78rem .6rem;text-align:center;transition:all .15s;}
+.mcard.sel{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);}
+.mcard-name{font-size:.72rem;font-weight:700;}
+.mcard-sub{font-size:.58rem;color:rgba(255,255,255,.28);margin-top:.15rem;line-height:1.3;}
+
+/* progress */
+.prog-wrap{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;display:none;}
+.prog-wrap.show{display:block;}
+.prog-title{font-size:.78rem;font-weight:600;color:#ef4444;margin-bottom:.65rem;}
+.prog-outer{background:rgba(255,255,255,.05);border-radius:3px;height:5px;overflow:hidden;margin-bottom:.45rem;}
+.prog-inner{height:100%;background:#ef4444;border-radius:3px;transition:width .35s ease;width:0;}
+.prog-status{font-size:.68rem;color:rgba(255,255,255,.32);}
+
+/* result */
+.result{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;display:none;}
+.result.show{display:block;}
+.result.ok{border-color:rgba(34,197,94,.22);}
+.result.fail{border-color:rgba(239,68,68,.22);}
+.result-title{font-size:.85rem;font-weight:700;}
+.result.ok .result-title{color:#22c55e;}
+.result.fail .result-title{color:#ef4444;}
+.result-desc{font-size:.72rem;color:rgba(255,255,255,.32);margin-top:.25rem;line-height:1.5;}
+
+/* attack btn */
+.btn-atk{width:100%;padding:.92rem;background:#ef4444;border:none;border-radius:11px;color:#fff;font-size:.78rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;transition:opacity .15s;}
+.btn-atk:active{opacity:.8;}
+.btn-atk:disabled{opacity:.3;}
+
+/* active attacks */
+.atk-item{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem;margin-bottom:.5rem;}
+.atk-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px #ef4444;flex-shrink:0;animation:pulse 1.2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.atk-info{flex:1;}
+.atk-target{font-size:.78rem;font-weight:600;}
+.atk-meta{font-size:.62rem;color:rgba(255,255,255,.32);margin-top:.1rem;}
+.btn-stop{padding:.3rem .7rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:7px;color:#ef4444;font-size:.65rem;font-weight:700;}
+
+/* endpoints */
+.ep-item{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.75rem .9rem;display:flex;align-items:center;gap:.65rem;margin-bottom:.45rem;}
+.ep-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 5px #22c55e;flex-shrink:0;}
+.ep-url{font-size:.72rem;color:rgba(255,255,255,.65);font-family:monospace;word-break:break-all;}
+
+/* navbar */
+.navbar{position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.15rem;background:rgba(14,14,14,.97);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:.42rem .45rem;z-index:100;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:.16rem;padding:.38rem .6rem;border-radius:10px;color:rgba(255,255,255,.28);text-decoration:none;min-width:40px;}
+.ni.active{color:#fff;background:rgba(255,255,255,.09);}
+.ni i{font-size:.92rem;}
+.ni span{font-size:.5rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(16,16,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.62rem 1.1rem;font-size:.8rem;z-index:999;transition:transform .22s;backdrop-filter:blur(20px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="page">
+
+  <div class="topbar">
+    <a class="back" href="/dashboard"><i class="fa-solid fa-chevron-left"></i></a>
+    <div><div class="tb-title">DDoS Panel</div><div class="tb-sub">Layer 4/7 attack via botnet methods</div></div>
+  </div>
+
+  <div class="stats3">
+    <div class="sm"><div class="sm-val" id="sEp">0</div><div class="sm-lbl">Methods</div></div>
+    <div class="sm"><div class="sm-val" id="sActive">0</div><div class="sm-lbl">Active</div></div>
+    <div class="sm"><div class="sm-val" id="sMethod">—</div><div class="sm-lbl">Selected</div></div>
+  </div>
+
+  <div class="slabel">Konfigurasi Attack</div>
+  <div class="fcard">
+    <div class="fgroup">
+      <label class="flabel">Target URL / IP</label>
+      <input class="finput" type="text" id="tTarget" placeholder="https://target.com atau 1.2.3.4" autocomplete="off">
+    </div>
+    <div class="fgroup">
+      <label class="flabel">Durasi (detik, max 300)</label>
+      <input class="finput" type="number" id="tTime" placeholder="60" min="1" max="300" inputmode="numeric" value="60">
+    </div>
+    <div class="fgroup">
+      <label class="flabel">Threads</label>
+      <input class="finput" type="number" id="tThreads" placeholder="4" min="1" max="16" inputmode="numeric" value="4">
+    </div>
+  </div>
+
+  <div class="slabel">Pilih Method</div>
+  <div class="mgrid" id="methodGrid">
+    <div class="mcard" onclick="selMethod('Pterodactyl',this)">
+      <div class="mcard-name">Pterodactyl</div>
+      <div class="mcard-sub">HTTP Flood + DB + SSL</div>
+    </div>
+    <div class="mcard" onclick="selMethod('Pterodactyl2',this)">
+      <div class="mcard-name">Pterodactyl2</div>
+      <div class="mcard-sub">Advanced + Proxy</div>
+    </div>
+    <div class="mcard" onclick="selMethod('Vercel-XMiX',this)">
+      <div class="mcard-name">Vercel XMiX</div>
+      <div class="mcard-sub">API Spam + Rotation</div>
+    </div>
+  </div>
+
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-title">LAUNCHING ATTACK...</div>
+    <div class="prog-outer"><div class="prog-inner" id="progBar"></div></div>
+    <div class="prog-status" id="progStatus">Memulai...</div>
+  </div>
+
+  <div class="result" id="resultBox">
+    <div class="result-title" id="rTitle"></div>
+    <div class="result-desc" id="rDesc"></div>
+  </div>
+
+  <button class="btn-atk" id="atkBtn" onclick="launchAttack()">LAUNCH ATTACK</button>
+
+  <div style="margin-top:1.5rem;">
+    <div class="slabel">Active Attacks</div>
+    <div id="activeList"><div style="font-size:.72rem;color:rgba(255,255,255,.22);text-align:center;padding:.8rem;">Tidak ada attack aktif</div></div>
+  </div>
+
+  <div style="margin-top:1.2rem;">
+    <div class="slabel">Available Methods</div>
+    <div id="methodList"><div style="font-size:.72rem;color:rgba(255,255,255,.22);text-align:center;padding:.8rem;">Loading...</div></div>
+  </div>
+
+</div>
+<nav class="navbar" id="nb"></nav>
+
+<script>
+const NAVS = [
+  { h:'/dashboard', l:'Home',   i:'fa-solid fa-house' },
+  { h:'/bugsender', l:'Bug',    i:'fa-brands fa-whatsapp' },
+  { h:'/ddos',      l:'DDoS',   i:'fa-solid fa-shield-halved' },
+  { h:'/toolscain', l:'Tools',  i:'fa-solid fa-wrench' },
+  { h:'/ai',        l:'AI',     i:'fa-solid fa-brain' },
+  { h:'/addsender', l:'Sender', i:'fa-solid fa-mobile-screen' },
+  { h:'/change',    l:'More',   i:'fa-solid fa-bars' },
+];
+document.getElementById('nb').innerHTML = NAVS.map(n =>
+  `<a class="ni${n.h===location.pathname?' active':''}" href="${n.h}"><i class="${n.i}"></i><span>${n.l}</span></a>`
+).join('');
+
+let selMethodId = null;
+let activeAttacks = [];
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function selMethod(id, el) {
+  selMethodId = id;
+  document.querySelectorAll('.mcard').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('sMethod').textContent = id.slice(0, 6);
+}
+
+async function loadMethods() {
+  try {
+    const d = await fetch('/api/ddos/methods').then(r => r.json());
+    if (!d.success) return;
+    document.getElementById('sEp').textContent = d.methods.length;
+    document.getElementById('methodList').innerHTML = d.methods.map(m =>
+      `<div class="ep-item"><div class="ep-dot"></div><div><div class="ep-url" style="color:#fff;font-family:inherit;font-size:.75rem;font-weight:600;">${m.name}</div><div class="ep-url" style="font-family:inherit;font-size:.62rem;margin-top:.1rem;">${m.description}</div></div></div>`
+    ).join('');
+  } catch {}
+}
+
+async function loadActiveAttacks() {
+  try {
+    const d = await fetch('/api/ddos/active').then(r => r.json());
+    if (!d.success) return;
+    activeAttacks = d.attacks;
+    document.getElementById('sActive').textContent = d.attacks.length;
+    const el = document.getElementById('activeList');
+    if (!d.attacks.length) {
+      el.innerHTML = '<div style="font-size:.72rem;color:rgba(255,255,255,.22);text-align:center;padding:.8rem;">Tidak ada attack aktif</div>';
+      return;
+    }
+    el.innerHTML = d.attacks.map(a =>
+      `<div class="atk-item">
+        <div class="atk-dot"></div>
+        <div class="atk-info">
+          <div class="atk-target">${a.target}</div>
+          <div class="atk-meta">${a.method} — ${a.elapsed}s / ${a.time}s</div>
+        </div>
+        <button class="btn-stop" onclick="stopAttack('${a.id}')">STOP</button>
+      </div>`
+    ).join('');
+  } catch {}
+}
+
+async function stopAttack(id) {
+  try {
+    const d = await fetch('/api/ddos/stop', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ attackId: id }),
+    }).then(r => r.json());
+    toast(d.message || 'Attack dihentikan');
+    await loadActiveAttacks();
+  } catch { toast('Gagal menghentikan attack'); }
+}
+
+async function launchAttack() {
+  const target  = document.getElementById('tTarget').value.trim();
+  const time    = document.getElementById('tTime').value;
+  const threads = document.getElementById('tThreads').value;
+  if (!target)        { toast('Masukkan target'); return; }
+  if (!selMethodId)   { toast('Pilih method terlebih dahulu'); return; }
+  if (!time || time < 1) { toast('Masukkan durasi yang valid'); return; }
+
+  const btn = document.getElementById('atkBtn');
+  const pw  = document.getElementById('progWrap');
+  const pb  = document.getElementById('progBar');
+  const ps  = document.getElementById('progStatus');
+  const rb  = document.getElementById('resultBox');
+
+  btn.disabled = true;
+  pw.className = 'prog-wrap show';
+  rb.className = 'result';
+
+  const steps = ['Menghubungkan ke method engine...', 'Menyiapkan attack payload...', 'Launching attack process...', 'Memverifikasi response...'];
+  let si = 0;
+  const iv = setInterval(() => {
+    if (si < steps.length) { pb.style.width = ((si + 1) / steps.length * 85) + '%'; ps.textContent = steps[si]; si++; }
+  }, 600);
+
+  try {
+    const d = await fetch('/api/ddos/attack', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ target, time: parseInt(time), method: selMethodId, threads: parseInt(threads) }),
+    }).then(r => r.json());
+
+    clearInterval(iv); pb.style.width = '100%'; ps.textContent = 'Selesai!';
+    await new Promise(r => setTimeout(r, 400));
+    pw.className = 'prog-wrap';
+
+    if (d.success) {
+      rb.className = 'result show ok';
+      document.getElementById('rTitle').textContent = 'Attack Launched!';
+      document.getElementById('rDesc').textContent = d.message + ' | PID: ' + (d.pid || '—');
+    } else {
+      rb.className = 'result show fail';
+      document.getElementById('rTitle').textContent = 'Gagal';
+      document.getElementById('rDesc').textContent = d.message || 'Terjadi kesalahan';
+    }
+    await loadActiveAttacks();
+  } catch {
+    clearInterval(iv); pw.className = 'prog-wrap';
+    toast('Koneksi gagal');
+  }
+  btn.disabled = false;
+}
+
+async function init() {
+  const s = await fetch('/api/session').then(r => r.json());
+  if (!s.loggedIn) { location.href = '/'; return; }
+  await loadMethods();
+  await loadActiveAttacks();
+  setInterval(loadActiveAttacks, 5000);
+}
+init();
+</script>
+</body>
+</html>

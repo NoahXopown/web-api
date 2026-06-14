@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Add Sender — Astro CRM</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;touch-action:manipulation;}
+.page{padding:1.2rem 1rem 6rem;}
+.topbar{display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem;}
+.back{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.back i{font-size:.82rem;color:rgba(255,255,255,.55);}
+.tb-title{font-size:1rem;font-weight:700;}
+.tb-sub{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+.slabel{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.7rem;}
+.notice{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.85rem 1rem;font-size:.7rem;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:1.2rem;}
+.notice b{color:rgba(255,255,255,.7);}
+
+.sender-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;position:relative;overflow:hidden;}
+.sender-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.sender-card.global::before{background:rgba(255,255,255,.25);}
+.sender-card.personal::before{background:rgba(34,197,94,.5);}
+
+.sc-header{display:flex;align-items:center;gap:.85rem;margin-bottom:.85rem;}
+.sc-ico{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sc-ico i{font-size:.95rem;color:rgba(255,255,255,.5);}
+.sc-info-title{font-size:.88rem;font-weight:700;}
+.sc-info-sub{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+.badge-on{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#22c55e;padding:.18rem .55rem;border-radius:5px;font-size:.6rem;font-weight:700;}
+.badge-off{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#ef4444;padding:.18rem .55rem;border-radius:5px;font-size:.6rem;font-weight:700;}
+.badge-pend{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);color:#eab308;padding:.18rem .55rem;border-radius:5px;font-size:.6rem;font-weight:700;}
+
+.info-rows{margin-bottom:.85rem;}
+.ir{display:flex;justify-content:space-between;align-items:center;padding:.38rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.ir:last-child{border-bottom:none;}
+.ir-lbl{font-size:.65rem;color:rgba(255,255,255,.3);}
+.ir-val{font-size:.7rem;font-weight:600;}
+
+.usage-bar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-top:.35rem;}
+.usage-fill{height:100%;background:rgba(255,255,255,.45);border-radius:2px;transition:width .5s;}
+.usage-fill.danger{background:#ef4444;}
+
+.fgroup{margin-bottom:.8rem;}
+.flabel{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.45rem;display:block;}
+.finput{width:100%;padding:.78rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:rgba(255,255,255,.2);}
+.finput::placeholder{color:rgba(255,255,255,.18);}
+
+.btn-row{display:flex;gap:.55rem;}
+.btn-prim{flex:1;padding:.78rem;background:#fff;border:none;border-radius:9px;color:#0a0a0a;font-size:.72rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;transition:opacity .15s;}
+.btn-prim:active{opacity:.8;}
+.btn-dang{padding:.78rem 1rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);border-radius:9px;color:#ef4444;font-size:.72rem;font-weight:800;}
+.btn-dang:active{opacity:.8;}
+
+.cd-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;}
+
+.navbar{position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.15rem;background:rgba(14,14,14,.97);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:.42rem .45rem;z-index:100;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:.16rem;padding:.38rem .6rem;border-radius:10px;color:rgba(255,255,255,.28);text-decoration:none;min-width:40px;}
+.ni.active{color:#fff;background:rgba(255,255,255,.09);}
+.ni i{font-size:.92rem;}
+.ni span{font-size:.5rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(16,16,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.62rem 1.1rem;font-size:.8rem;z-index:999;transition:transform .22s;backdrop-filter:blur(20px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="page">
+
+  <div class="topbar">
+    <a class="back" href="/dashboard"><i class="fa-solid fa-chevron-left"></i></a>
+    <div><div class="tb-title">Add Sender</div><div class="tb-sub">Kelola koneksi WhatsApp sender</div></div>
+  </div>
+
+  <div class="notice">
+    <b>Global Sender</b> — Hanya owner yang bisa menghubungkan via bot: <code>/senderglobal nomor</code><br>
+    <b>Personal Sender</b> — Request di sini lalu konfirmasi owner via bot: <code>/pairpersonal username nomor</code>
+  </div>
+
+  <div class="slabel">Global Sender</div>
+  <div class="sender-card global">
+    <div class="sc-header">
+      <div class="sc-ico"><i class="fa-solid fa-globe"></i></div>
+      <div class="sc-info">
+        <div class="sc-info-title">Global Sender</div>
+        <div class="sc-info-sub">Dikelola eksklusif oleh owner</div>
+      </div>
+      <div style="margin-left:auto;"><span id="gBadge" class="badge-off">Offline</span></div>
+    </div>
+    <div class="info-rows">
+      <div class="ir"><span class="ir-lbl">Nomor</span><span class="ir-val" id="gNum">—</span></div>
+      <div class="ir"><span class="ir-lbl">Bug Tersedia</span><span class="ir-val">Delay Hard, iOS Crash</span></div>
+      <div class="ir"><span class="ir-lbl">Penggunaan Saya</span><span class="ir-val" id="gUsage">0 / 5</span></div>
+      <div class="ir"><span class="ir-lbl">Cooldown</span><span class="ir-val" id="gCd">—</span></div>
+    </div>
+    <div class="usage-bar"><div class="usage-fill" id="gUsageFill" style="width:0%"></div></div>
+    <div style="font-size:.62rem;color:rgba(255,255,255,.22);margin-top:.55rem;">Limit 5x penggunaan, lalu cooldown 5 menit otomatis</div>
+  </div>
+
+  <div class="slabel">Personal Sender</div>
+  <div class="sender-card personal">
+    <div class="sc-header">
+      <div class="sc-ico"><i class="fa-solid fa-mobile-screen"></i></div>
+      <div class="sc-info">
+        <div class="sc-info-title">Personal Sender</div>
+        <div class="sc-info-sub">WhatsApp number pribadi</div>
+      </div>
+      <div style="margin-left:auto;"><span id="pBadge" class="badge-off">Offline</span></div>
+    </div>
+    <div class="info-rows">
+      <div class="ir"><span class="ir-lbl">Nomor</span><span class="ir-val" id="pNum">—</span></div>
+      <div class="ir"><span class="ir-lbl">Bug Tersedia</span><span class="ir-val">Semua Bug</span></div>
+      <div class="ir"><span class="ir-lbl">Cooldown</span><span class="ir-val" id="pCd">—</span></div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.05);padding-top:.85rem;margin-top:.1rem;">
+      <div class="fgroup">
+        <label class="flabel">Nomor WhatsApp</label>
+        <input class="finput" type="tel" id="pNumInput" placeholder="628xxxxxxxxxx" inputmode="tel">
+      </div>
+      <div class="btn-row">
+        <button class="btn-prim" onclick="pairPersonal()">REQUEST PAIRING</button>
+        <button class="btn-dang" id="delBtn" onclick="deletePersonal()" style="display:none;">HAPUS</button>
+      </div>
+      <div style="font-size:.62rem;color:rgba(255,255,255,.22);margin-top:.6rem;line-height:1.5;">
+        Setelah request, minta owner konfirmasi via bot Telegram dengan perintah di atas.
+      </div>
+    </div>
+  </div>
+
+  <div class="slabel">Status Cooldown</div>
+  <div class="cd-card">
+    <div class="info-rows">
+      <div class="ir"><span class="ir-lbl">Global Cooldown</span><span class="ir-val" id="cdG">—</span></div>
+      <div class="ir"><span class="ir-lbl">Personal Cooldown</span><span class="ir-val" id="cdP">—</span></div>
+    </div>
+  </div>
+</div>
+
+<nav class="navbar" id="nb"></nav>
+
+<script>
+const NAVS = [
+  { h:'/dashboard', l:'Home',   i:'fa-solid fa-house' },
+  { h:'/bugsender', l:'Bug',    i:'fa-brands fa-whatsapp' },
+  { h:'/ddos',      l:'DDoS',   i:'fa-solid fa-shield-halved' },
+  { h:'/toolscain', l:'Tools',  i:'fa-solid fa-wrench' },
+  { h:'/ai',        l:'AI',     i:'fa-solid fa-brain' },
+  { h:'/addsender', l:'Sender', i:'fa-solid fa-mobile-screen' },
+  { h:'/change',    l:'More',   i:'fa-solid fa-bars' },
+];
+document.getElementById('nb').innerHTML = NAVS.map(n =>
+  `<a class="ni${n.h===location.pathname?' active':''}" href="${n.h}"><i class="${n.i}"></i><span>${n.l}</span></a>`
+).join('');
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+async function loadStatus() {
+  try {
+    const d = await fetch('/api/sender/status').then(r => r.json());
+    if (!d.success) return;
+
+    const gb = document.getElementById('gBadge');
+    const gn = document.getElementById('gNum');
+    if (d.global && d.global.connected) {
+      gb.className = 'badge-on'; gb.textContent = 'Online';
+      gn.textContent = d.global.number || '—';
+    } else { gb.className = 'badge-off'; gb.textContent = 'Offline'; gn.textContent = '—'; }
+
+    const gu = d.globalUsage || 0;
+    document.getElementById('gUsage').textContent = gu + ' / 5';
+    document.getElementById('gCd').textContent = d.cooldown?.global ? d.cooldown.global + 's' : 'Tidak ada';
+    const gf = document.getElementById('gUsageFill');
+    gf.style.width = ((gu / 5) * 100) + '%';
+    gf.className = 'usage-fill' + (gu >= 4 ? ' danger' : '');
+
+    const pb = document.getElementById('pBadge');
+    const pn = document.getElementById('pNum');
+    const db = document.getElementById('delBtn');
+    if (d.personal && d.personal.connected) {
+      pb.className = 'badge-on'; pb.textContent = 'Online';
+      pn.textContent = d.personal.number || '—'; db.style.display = 'block';
+      document.getElementById('pNumInput').value = d.personal.number || '';
+    } else if (d.personal && d.personal.pending) {
+      pb.className = 'badge-pend'; pb.textContent = 'Pending';
+      pn.textContent = d.personal.number || '—'; db.style.display = 'block';
+    } else { pb.className = 'badge-off'; pb.textContent = 'Offline'; pn.textContent = '—'; db.style.display = 'none'; }
+
+    document.getElementById('cdG').textContent = d.cooldown?.global ? d.cooldown.global + 's tersisa' : 'Tidak ada';
+    document.getElementById('cdP').textContent = d.cooldown?.personal ? d.cooldown.personal + 's tersisa' : 'Tidak ada';
+  } catch {}
+}
+
+async function pairPersonal() {
+  const num = document.getElementById('pNumInput').value.trim();
+  if (!num) { toast('Masukkan nomor WhatsApp'); return; }
+  try {
+    const d = await fetch('/api/sender/pair', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ number: num }),
+    }).then(r => r.json());
+    if (d.success) { toast('Request dikirim! Minta owner konfirmasi.'); await loadStatus(); }
+    else toast(d.message || 'Gagal');
+  } catch { toast('Koneksi gagal'); }
+}
+
+async function deletePersonal() {
+  try {
+    const d = await fetch('/api/sender/personal', { method: 'DELETE' }).then(r => r.json());
+    if (d.success) { toast('Sender personal dihapus'); await loadStatus(); }
+    else toast(d.message || 'Gagal');
+  } catch { toast('Gagal'); }
+}
+
+async function init() {
+  const s = await fetch('/api/session').then(r => r.json());
+  if (!s.loggedIn) { location.href = '/'; return; }
+  await loadStatus();
+  setInterval(loadStatus, 8000);
+}
+init();
+</script>
+</body>
+</html>

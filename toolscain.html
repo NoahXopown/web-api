@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Tools Cain — Astro CRM</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;touch-action:manipulation;}
+.page{padding:1.2rem 1rem 6rem;}
+.topbar{display:flex;align-items:center;gap:.8rem;margin-bottom:1.4rem;}
+.back{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;text-decoration:none;}
+.back i{font-size:.82rem;color:rgba(255,255,255,.55);}
+.tb-title{font-size:1rem;font-weight:700;}
+.tb-sub{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.1rem;}
+
+/* category scroll */
+.cat-scroll{display:flex;gap:.45rem;overflow-x:auto;padding-bottom:.5rem;margin-bottom:1.2rem;scrollbar-width:none;}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.cat-pill{padding:.42rem .88rem;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.3);background:#111;flex-shrink:0;transition:all .15s;}
+.cat-pill.active{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:#fff;}
+
+/* panels */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* tool grid (2x2 for overview) */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem;}
+.tg-card{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:.88rem;display:flex;flex-direction:column;gap:.45rem;position:relative;}
+.tg-arrow{position:absolute;top:.75rem;right:.75rem;color:rgba(255,255,255,.15);font-size:.65rem;}
+.tg-ico{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;}
+.tg-ico i{font-size:.82rem;color:rgba(255,255,255,.45);}
+.tg-name{font-size:.8rem;font-weight:700;}
+.tg-sub{font-size:.62rem;color:rgba(255,255,255,.3);line-height:1.3;}
+
+/* form card */
+.fcard{background:#111;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-bottom:1rem;}
+.fgroup{margin-bottom:.85rem;}
+.fgroup:last-of-type{margin-bottom:0;}
+.flabel{font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.45rem;display:block;}
+.finput{width:100%;padding:.78rem .9rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;}
+.finput:focus{border-color:rgba(255,255,255,.2);}
+.finput::placeholder{color:rgba(255,255,255,.18);}
+textarea.finput{resize:none;min-height:80px;line-height:1.5;}
+select.finput option{background:#111;color:#fff;}
+
+/* upload area */
+.upload-zone{border:1.5px dashed rgba(255,255,255,.12);border-radius:11px;padding:1.3rem;text-align:center;background:rgba(255,255,255,.02);margin-bottom:.85rem;transition:border-color .2s;}
+.upload-zone.has-file{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03);}
+.upload-zone i{font-size:1.3rem;color:rgba(255,255,255,.2);margin-bottom:.5rem;display:block;}
+.upload-lbl{font-size:.72rem;color:rgba(255,255,255,.28);}
+.upload-lbl span{color:rgba(255,255,255,.55);}
+.upload-file{font-size:.68rem;color:#22c55e;margin-top:.35rem;}
+.upload-input{display:none;}
+
+/* run button */
+.btn-run{width:100%;padding:.88rem;background:#fff;border:none;border-radius:10px;color:#0a0a0a;font-size:.75rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;transition:opacity .15s,transform .1s;}
+.btn-run:active{opacity:.8;transform:scale(.99);}
+.btn-run:disabled{opacity:.3;}
+
+/* progress inline */
+.prog-mini{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-top:.65rem;display:none;}
+.prog-mini.show{display:block;}
+.prog-mini-fill{height:100%;background:#fff;border-radius:2px;animation:progAnim 1.4s ease infinite;}
+@keyframes progAnim{0%{width:0%}60%{width:75%}100%{width:100%}}
+
+/* result */
+.rbox{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.9rem;font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.7;white-space:pre-wrap;word-break:break-all;margin-top:.8rem;display:none;}
+.rbox.show{display:block;}
+.rbox.ok{border-color:rgba(34,197,94,.2);color:rgba(200,255,220,.75);}
+.rbox.fail{border-color:rgba(239,68,68,.2);color:rgba(255,180,180,.75);}
+
+/* section label */
+.slabel{font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.7rem;}
+
+/* navbar */
+.navbar{position:fixed;bottom:.8rem;left:50%;transform:translateX(-50%);display:flex;gap:.15rem;background:rgba(14,14,14,.97);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:.42rem .45rem;z-index:100;box-shadow:0 8px 40px rgba(0,0,0,.7);}
+.ni{display:flex;flex-direction:column;align-items:center;gap:.16rem;padding:.38rem .6rem;border-radius:10px;color:rgba(255,255,255,.28);text-decoration:none;min-width:40px;}
+.ni.active{color:#fff;background:rgba(255,255,255,.09);}
+.ni i{font-size:.92rem;}
+.ni span{font-size:.5rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(16,16,16,.97);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.62rem 1.1rem;font-size:.8rem;z-index:999;transition:transform .22s;backdrop-filter:blur(20px);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="page">
+
+  <div class="topbar">
+    <a class="back" href="/dashboard"><i class="fa-solid fa-chevron-left"></i></a>
+    <div><div class="tb-title">Advanced Toolkits</div><div class="tb-sub">Semua tools dalam satu panel</div></div>
+  </div>
+
+  <!-- OVERVIEW GRID -->
+  <div class="tool-grid" id="overviewGrid">
+    <div class="tg-card" onclick="switchCat('spam')">
+      <i class="fa-solid fa-arrow-up-right-from-square tg-arrow"></i>
+      <div class="tg-ico"><i class="fa-solid fa-bolt"></i></div>
+      <div class="tg-name">DDoS</div>
+      <div class="tg-sub">Layer 4/7 Stress</div>
+    </div>
+    <div class="tg-card" onclick="switchCat('osint')">
+      <i class="fa-solid fa-arrow-up-right-from-square tg-arrow"></i>
+      <div class="tg-ico"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="tg-name">Network</div>
+      <div class="tg-sub">Packet Analysis</div>
+    </div>
+    <div class="tg-card" onclick="switchCat('code')">
+      <i class="fa-solid fa-arrow-up-right-from-square tg-arrow"></i>
+      <div class="tg-ico"><i class="fa-solid fa-list-check"></i></div>
+      <div class="tg-name">OSINT</div>
+      <div class="tg-sub">Cyber Intelligence</div>
+    </div>
+    <div class="tg-card" onclick="switchCat('media')">
+      <i class="fa-solid fa-arrow-up-right-from-square tg-arrow"></i>
+      <div class="tg-ico"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+      <div class="tg-name">Media</div>
+      <div class="tg-sub">SMS Exploitation</div>
+    </div>
+  </div>
+
+  <!-- CATEGORY PILLS -->
+  <div class="cat-scroll">
+    <div class="cat-pill active" id="pill_all"    onclick="switchCat('all')">All Tools</div>
+    <div class="cat-pill"        id="pill_spam"   onclick="switchCat('spam')">Spam</div>
+    <div class="cat-pill"        id="pill_osint"  onclick="switchCat('osint')">OSINT</div>
+    <div class="cat-pill"        id="pill_code"   onclick="switchCat('code')">Code</div>
+    <div class="cat-pill"        id="pill_report" onclick="switchCat('report')">Report</div>
+    <div class="cat-pill"        id="pill_fixred" onclick="switchCat('fixred')">FixRed</div>
+    <div class="cat-pill"        id="pill_media"  onclick="switchCat('media')">Media</div>
+    <div class="cat-pill"        id="pill_protect" onclick="switchCat('protect')">Protect</div>
+  </div>
+
+  <!-- ══ ALL / DEFAULT ══ -->
+  <div class="panel active" id="panel_all">
+    <div class="slabel">Pilih kategori di atas</div>
+    <div style="text-align:center;padding:2rem 0;color:rgba(255,255,255,.2);font-size:.8rem;">
+      <i class="fa-solid fa-wrench" style="font-size:2rem;display:block;margin-bottom:.8rem;opacity:.3;"></i>
+      Pilih kategori tool yang ingin digunakan
+    </div>
+  </div>
+
+  <!-- ══ SPAM NGL ══ -->
+  <div class="panel" id="panel_spam">
+    <div class="slabel">Spam NGL</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">Username NGL</label>
+        <input class="finput" type="text" id="nglUser" placeholder="username_target" autocomplete="off">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Pesan</label>
+        <textarea class="finput" id="nglMsg" placeholder="Pesan yang akan dikirim..."></textarea>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Jumlah Loop (max 50)</label>
+        <input class="finput" type="number" id="nglLoops" placeholder="1" min="1" max="50" value="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="prog-mini" id="nglProg"></div>
+    <div class="rbox" id="nglResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runSpamNgl()">KIRIM SPAM NGL</button>
+    </div>
+  </div>
+
+  <!-- ══ OSINT / NIK ══ -->
+  <div class="panel" id="panel_osint">
+    <div class="slabel">NIK Parser</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">Nomor NIK (16 digit)</label>
+        <input class="finput" type="text" id="nikInput" placeholder="3273XXXXXXXXXXXX" inputmode="numeric" maxlength="16">
+      </div>
+    </div>
+    <div class="prog-mini" id="nikProg"></div>
+    <div class="rbox" id="nikResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runNik()">CEK NIK</button>
+    </div>
+
+    <div class="slabel" style="margin-top:1.3rem;">Cek Web Protection</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">URL Target</label>
+        <input class="finput" type="text" id="protUrl" placeholder="https://target.com" autocomplete="off">
+      </div>
+    </div>
+    <div class="prog-mini" id="protProg"></div>
+    <div class="rbox" id="protResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runProtect()">SCAN PROTEKSI</button>
+    </div>
+  </div>
+
+  <!-- ══ CODE ══ -->
+  <div class="panel" id="panel_code">
+    <div class="slabel">Encrypt JavaScript</div>
+    <div class="fcard">
+      <div class="upload-zone" id="jsZone" onclick="document.getElementById('jsFile').click()">
+        <i class="fa-solid fa-file-code"></i>
+        <div class="upload-lbl">Ketuk untuk pilih file <span>.js / .ts</span></div>
+        <div class="upload-file" id="jsFileName"></div>
+        <input class="upload-input" type="file" id="jsFile" accept=".js,.ts,.mjs" onchange="handleJsFile(this)">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Level Enkripsi</label>
+        <select class="finput" id="jsLevel">
+          <option value="1">Level 1 — Base64 Eval</option>
+          <option value="2" selected>Level 2 — XOR + Base64</option>
+          <option value="3">Level 3 — Obfuscate + XOR</option>
+        </select>
+      </div>
+    </div>
+    <div class="prog-mini" id="jsEncProg"></div>
+    <div class="rbox" id="jsEncResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runEncJs()">ENKRIPSI JS</button>
+    </div>
+
+    <div class="slabel" style="margin-top:1.3rem;">Encrypt HTML</div>
+    <div class="fcard">
+      <div class="upload-zone" id="htmlZone" onclick="document.getElementById('htmlFile').click()">
+        <i class="fa-solid fa-file-code"></i>
+        <div class="upload-lbl">Ketuk untuk pilih file <span>.html</span></div>
+        <div class="upload-file" id="htmlFileName"></div>
+        <input class="upload-input" type="file" id="htmlFile" accept=".html,.htm" onchange="handleHtmlFile(this)">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Level Enkripsi</label>
+        <select class="finput" id="htmlLevel">
+          <option value="1">Level 1 — Basic (Base64)</option>
+          <option value="2">Level 2 — Advanced (XOR+B64)</option>
+          <option value="3" selected>Level 3 — Maximum (Anti DevTools)</option>
+        </select>
+      </div>
+    </div>
+    <div class="prog-mini" id="htmlEncProg"></div>
+    <div class="rbox" id="htmlEncResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runEncHtml()">ENKRIPSI HTML</button>
+    </div>
+  </div>
+
+  <!-- ══ REPORT ══ -->
+  <div class="panel" id="panel_report">
+    <div class="slabel">Report TikTok</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">Username TikTok</label>
+        <input class="finput" type="text" id="ttUser" placeholder="@username" autocomplete="off">
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Jumlah Report (max 100)</label>
+        <input class="finput" type="number" id="ttAmount" placeholder="10" min="1" max="100" value="10" inputmode="numeric">
+      </div>
+    </div>
+    <div class="prog-mini" id="ttProg"></div>
+    <div class="rbox" id="ttResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runReport()">REPORT TIKTOK</button>
+    </div>
+  </div>
+
+  <!-- ══ FIXRED ══ -->
+  <div class="panel" id="panel_fixred">
+    <div class="slabel">Fix WhatsApp Red</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">Nomor Target</label>
+        <input class="finput" type="tel" id="fixNum" placeholder="628xxxxxxxxxx" inputmode="tel">
+      </div>
+    </div>
+    <div class="prog-mini" id="fixProg"></div>
+    <div class="rbox" id="fixResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runFixred()">FIX RED</button>
+    </div>
+  </div>
+
+  <!-- ══ MEDIA ══ -->
+  <div class="panel" id="panel_media">
+    <div class="slabel">TikTok Downloader</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">URL Video TikTok</label>
+        <input class="finput" type="text" id="ttdlUrl" placeholder="https://www.tiktok.com/@user/video/..." autocomplete="off">
+      </div>
+    </div>
+    <div class="prog-mini" id="ttdlProg"></div>
+    <div class="rbox" id="ttdlResult"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runTTDL()">DOWNLOAD VIDEO</button>
+    </div>
+  </div>
+
+  <!-- ══ PROTECT ══ -->
+  <div class="panel" id="panel_protect">
+    <div class="slabel">Cek Web Protection</div>
+    <div class="fcard">
+      <div class="fgroup">
+        <label class="flabel">URL Target</label>
+        <input class="finput" type="text" id="prot2Url" placeholder="https://target.com" autocomplete="off">
+      </div>
+    </div>
+    <div class="prog-mini" id="prot2Prog"></div>
+    <div class="rbox" id="prot2Result"></div>
+    <div style="margin-top:.8rem;">
+      <button class="btn-run" onclick="runProtect2()">SCAN PROTEKSI</button>
+    </div>
+  </div>
+
+</div>
+<nav class="navbar" id="nb"></nav>
+
+<script>
+const NAVS = [
+  { h:'/dashboard', l:'Home',   i:'fa-solid fa-house' },
+  { h:'/bugsender', l:'Bug',    i:'fa-brands fa-whatsapp' },
+  { h:'/ddos',      l:'DDoS',   i:'fa-solid fa-shield-halved' },
+  { h:'/toolscain', l:'Tools',  i:'fa-solid fa-wrench' },
+  { h:'/ai',        l:'AI',     i:'fa-solid fa-brain' },
+  { h:'/addsender', l:'Sender', i:'fa-solid fa-mobile-screen' },
+  { h:'/change',    l:'More',   i:'fa-solid fa-bars' },
+];
+document.getElementById('nb').innerHTML = NAVS.map(n =>
+  `<a class="ni${n.h===location.pathname?' active':''}" href="${n.h}"><i class="${n.i}"></i><span>${n.l}</span></a>`
+).join('');
+
+const CATS = ['all','spam','osint','code','report','fixred','media','protect'];
+
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function switchCat(cat) {
+  CATS.forEach(c => {
+    document.getElementById('panel_' + c).className = 'panel' + (c === cat ? ' active' : '');
+    const pill = document.getElementById('pill_' + c);
+    if (pill) pill.className = 'cat-pill' + (c === cat ? ' active' : '');
+  });
+  document.getElementById('overviewGrid').style.display = cat === 'all' ? 'grid' : 'none';
+}
+
+function showProg(id, show) {
+  document.getElementById(id).className = 'prog-mini' + (show ? ' show' : '');
+}
+
+function showResult(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'rbox show' + (type ? ' ' + type : '');
+}
+
+// ── JS File state ─────────────────────────
+let jsContent   = null;
+let htmlContent = null;
+
+function handleJsFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    jsContent = e.target.result;
+    document.getElementById('jsFileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    document.getElementById('jsZone').className = 'upload-zone has-file';
+  };
+  reader.readAsText(file);
+}
+
+function handleHtmlFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    htmlContent = e.target.result;
+    document.getElementById('htmlFileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    document.getElementById('htmlZone').className = 'upload-zone has-file';
+  };
+  reader.readAsText(file);
+}
+
+// ── Client-side encryption ─────────────────
+function encJS(code, level) {
+  const b64 = btoa(unescape(encodeURIComponent(code)));
+  if (level === 1) return "eval(Buffer.from('" + b64 + "','base64').toString());";
+  const key = Math.floor(Math.random() * 180) + 60;
+  const bytes = new TextEncoder().encode(code);
+  const xored = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) xored[i] = bytes[i] ^ key;
+  const enc = btoa(String.fromCharCode(...xored));
+  if (level === 2) return "(function(){var _k=" + key + ",_d=Buffer.from('" + enc + "','base64'),_r=Buffer.allocUnsafe(_d.length);for(var i=0;i<_d.length;i++)_r[i]=_d[i]^_k;eval(_r.toString());})();";
+  let r = code.replace(/'([^'\\]{4,})'/g, (_, s) =>
+    s.split('').map(c => 'String.fromCharCode(' + c.charCodeAt(0) + ')').join('+')
+  );
+  const b2 = new TextEncoder().encode(r);
+  const x2 = new Uint8Array(b2.length);
+  for (let i = 0; i < b2.length; i++) x2[i] = b2[i] ^ key;
+  return "(function(){var _k=" + key + ",_d=Buffer.from('" + btoa(String.fromCharCode(...x2)) + "','base64'),_r=Buffer.allocUnsafe(_d.length);for(var i=0;i<_d.length;i++)_r[i]=_d[i]^_k;eval(_r.toString());})();";
+}
+
+function encHTML(html, level) {
+  const b64 = btoa(unescape(encodeURIComponent(html)));
+  if (level === 1) return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><script>(function(){var d=decodeURIComponent(escape(atob(\'' + b64 + '\')));document.open();document.write(d);document.close();})();<\/script></body></html>';
+  const key = Math.floor(Math.random() * 180) + 60;
+  const bytes = new TextEncoder().encode(html);
+  const xored = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) xored[i] = bytes[i] ^ key;
+  const enc = btoa(btoa(String.fromCharCode(...xored)));
+  if (level === 2) return '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{background:#000}</style></head><body><script>!function(){var _a=\'' + enc + '\',_b=atob(atob(_a)),_k=' + key + ',_c=new Uint8Array(_b.length);for(var i=0;i<_b.length;i++)_c[i]=_b.charCodeAt(i)^_k;document.open();document.write(new TextDecoder().decode(_c));document.close();}();<\/script></body></html>';
+  const k1 = Math.floor(Math.random() * 80) + 120, k2 = Math.floor(Math.random() * 80) + 160;
+  const b2  = new TextEncoder().encode(html);
+  const x1  = new Uint8Array(b2.length); for (let i = 0; i < b2.length; i++) x1[i] = b2[i] ^ k1;
+  const x2b = new TextEncoder().encode(btoa(String.fromCharCode(...x1)));
+  const x2  = new Uint8Array(x2b.length); for (let i = 0; i < x2b.length; i++) x2[i] = x2b[i] ^ k2;
+  const fin = btoa(btoa(String.fromCharCode(...x2)));
+  const chunks = fin.match(/.{1,100}/g).map(c => "'" + c + "'").join(',');
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{-webkit-user-select:none;user-select:none}body{background:#000;color:#000}</style></head><body><script>(function(){var _t=setInterval(function(){var _s=+new Date;debugger;if(+new Date-_s>100){document.body.innerHTML="";clearInterval(_t);}},800);})();document.addEventListener("contextmenu",function(e){e.preventDefault();});!function(){var _c=[' + chunks + '],_k1=' + k1 + ',_k2=' + k2 + ',_j=_c.join("");var _d1=atob(_j),_b1=new Uint8Array(_d1.length);for(var i=0;i<_d1.length;i++)_b1[i]=_d1.charCodeAt(i)^_k2;var _d2=atob(new TextDecoder().decode(_b1)),_b2=new Uint8Array(_d2.length);for(var i=0;i<_d2.length;i++)_b2[i]=_d2.charCodeAt(i)^_k1;document.open();document.write(new TextDecoder().decode(_b2));document.close();}();<\/script></body></html>';
+}
+
+function downloadFile(content, filename) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Tool runners ───────────────────────────
+async function runSpamNgl() {
+  const user  = document.getElementById('nglUser').value.trim();
+  const msg   = document.getElementById('nglMsg').value.trim();
+  const loops = parseInt(document.getElementById('nglLoops').value) || 1;
+  if (!user || !msg) { toast('Username dan pesan wajib diisi'); return; }
+  showProg('nglProg', true);
+  document.getElementById('nglResult').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/spamngl', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, message: msg, loops }),
+    }).then(r => r.json());
+    showProg('nglProg', false);
+    if (d.success) showResult('nglResult', 'Spam NGL selesai!\nBerhasil: ' + (d.result?.success || 0) + '\nGagal: ' + (d.result?.failed || 0), 'ok');
+    else showResult('nglResult', 'Gagal: ' + d.message, 'fail');
+  } catch { showProg('nglProg', false); showResult('nglResult', 'Koneksi gagal', 'fail'); }
+}
+
+async function runNik() {
+  const nik = document.getElementById('nikInput').value.trim();
+  if (!nik || nik.length !== 16) { toast('NIK harus 16 digit'); return; }
+  showProg('nikProg', true);
+  document.getElementById('nikResult').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/nikparse', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nik }),
+    }).then(r => r.json());
+    showProg('nikProg', false);
+    if (d.success) {
+      const v = d.data;
+      showResult('nikResult', [
+        'NIK       : ' + (v.nik || nik),
+        'Provinsi  : ' + (v.province || '—'),
+        'Kab/Kota  : ' + (v.kabupatenKota || '—'),
+        'Kecamatan : ' + (v.kecamatan || '—'),
+        'Kelamin   : ' + (v.kelamin || '—'),
+        'Lahir     : ' + (v.lahir || '—'),
+      ].join('\n'), 'ok');
+    } else showResult('nikResult', 'Gagal: ' + d.message, 'fail');
+  } catch { showProg('nikProg', false); showResult('nikResult', 'Koneksi gagal', 'fail'); }
+}
+
+async function runProtect() {
+  const url = document.getElementById('protUrl').value.trim();
+  if (!url) { toast('Masukkan URL target'); return; }
+  showProg('protProg', true);
+  document.getElementById('protResult').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/cekprotect', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    }).then(r => r.json());
+    showProg('protProg', false);
+    if (d.success) showResult('protResult', d.result || 'Scan selesai', 'ok');
+    else showResult('protResult', 'Gagal: ' + d.message, 'fail');
+  } catch { showProg('protProg', false); showResult('protResult', 'Koneksi gagal', 'fail'); }
+}
+
+async function runProtect2() {
+  const url = document.getElementById('prot2Url').value.trim();
+  if (!url) { toast('Masukkan URL target'); return; }
+  showProg('prot2Prog', true);
+  document.getElementById('prot2Result').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/cekprotect', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    }).then(r => r.json());
+    showProg('prot2Prog', false);
+    if (d.success) showResult('prot2Result', d.result || 'Scan selesai', 'ok');
+    else showResult('prot2Result', 'Gagal: ' + d.message, 'fail');
+  } catch { showProg('prot2Prog', false); showResult('prot2Result', 'Koneksi gagal', 'fail'); }
+}
+
+async function runEncJs() {
+  if (!jsContent) { toast('Pilih file .js terlebih dahulu'); return; }
+  const level = parseInt(document.getElementById('jsLevel').value);
+  showProg('jsEncProg', true);
+  document.getElementById('jsEncResult').className = 'rbox';
+  await new Promise(r => setTimeout(r, 200));
+  try {
+    const enc = encJS(jsContent, level);
+    showProg('jsEncProg', false);
+    downloadFile(enc, 'encrypted_l' + level + '_' + Date.now() + '.js');
+    showResult('jsEncResult', 'Enkripsi Level ' + level + ' berhasil!\nUkuran: ' + (enc.length / 1024).toFixed(1) + ' KB\nFile didownload otomatis.', 'ok');
+  } catch (e) { showProg('jsEncProg', false); showResult('jsEncResult', 'Error: ' + e.message, 'fail'); }
+}
+
+async function runEncHtml() {
+  if (!htmlContent) { toast('Pilih file .html terlebih dahulu'); return; }
+  const level = parseInt(document.getElementById('htmlLevel').value);
+  showProg('htmlEncProg', true);
+  document.getElementById('htmlEncResult').className = 'rbox';
+  await new Promise(r => setTimeout(r, 200));
+  try {
+    const enc = encHTML(htmlContent, level);
+    showProg('htmlEncProg', false);
+    downloadFile(enc, 'encrypted_l' + level + '_' + Date.now() + '.html');
+    const lnames = { 1: 'Basic', 2: 'Advanced', 3: 'Maximum (Anti DevTools)' };
+    showResult('htmlEncResult', 'HTML Enkripsi ' + (lnames[level] || '') + ' berhasil!\nFile didownload otomatis.', 'ok');
+  } catch (e) { showProg('htmlEncProg', false); showResult('htmlEncResult', 'Error: ' + e.message, 'fail'); }
+}
+
+async function runReport() {
+  const user   = document.getElementById('ttUser').value.trim();
+  const amount = parseInt(document.getElementById('ttAmount').value) || 10;
+  if (!user) { toast('Masukkan username TikTok'); return; }
+  showProg('ttProg', true);
+  document.getElementById('ttResult').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/reporttiktok', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: user, amount }),
+    }).then(r => r.json());
+    showProg('ttProg', false);
+    if (d.success) showResult('ttResult', 'Report ' + amount + 'x ke @' + user + ' berhasil!', 'ok');
+    else showResult('ttResult', 'Gagal: ' + d.message, 'fail');
+  } catch { showProg('ttProg', false); showResult('ttResult', 'Koneksi gagal', 'fail'); }
+}
+
+async function runFixred() {
+  const num = document.getElementById('fixNum').value.trim();
+  if (!num) { toast('Masukkan nomor target'); return; }
+  showProg('fixProg', true);
+  document.getElementById('fixResult').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/fixred', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number: num }),
+    }).then(r => r.json());
+    showProg('fixProg', false);
+    if (d.success) showResult('fixResult', d.message, 'ok');
+    else showResult('fixResult', 'Gagal: ' + d.message, 'fail');
+  } catch { showProg('fixProg', false); showResult('fixResult', 'Koneksi gagal', 'fail'); }
+}
+
+async function runTTDL() {
+  const url = document.getElementById('ttdlUrl').value.trim();
+  if (!url) { toast('Masukkan URL TikTok'); return; }
+  showProg('ttdlProg', true);
+  document.getElementById('ttdlResult').className = 'rbox';
+  try {
+    const d = await fetch('/api/tools/tiktokdl', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    }).then(r => r.json());
+    showProg('ttdlProg', false);
+    if (d.success && d.data) {
+      showResult('ttdlResult', 'Download berhasil!\nCaption: ' + (d.data.caption || 'No Caption') + '\n\nURL Video: ' + (d.data.play || '—'), 'ok');
+    } else showResult('ttdlResult', 'Gagal: ' + (d.message || 'URL tidak valid'), 'fail');
+  } catch { showProg('ttdlProg', false); showResult('ttdlResult', 'Koneksi gagal', 'fail'); }
+}
+
+async function init() {
+  const s = await fetch('/api/session').then(r => r.json());
+  if (!s.loggedIn) { location.href = '/'; return; }
+}
+init();
+</script>
+</body>
+</html>

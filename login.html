@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<title>Astro CRM v3.0</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0a0a0a;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;touch-action:manipulation;}
+
+/* ── LOADING ── */
+#loadingPage{position:fixed;inset:0;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:0;}
+.load-avatar{width:90px;height:90px;border-radius:20px;overflow:hidden;border:2px solid rgba(255,255,255,.08);margin-bottom:1.6rem;}
+.load-avatar img{width:100%;height:100%;object-fit:cover;}
+.load-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.07);border-top-color:rgba(255,255,255,.6);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:1.2rem;}
+.load-name{font-size:1rem;font-weight:800;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:.3rem;}
+.load-sub{font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:1.4rem;}
+.load-progress{width:140px;height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.load-bar{height:100%;background:rgba(255,255,255,.5);border-radius:2px;width:0;transition:width .08s linear;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── WELCOME ── */
+#welcomePage{position:fixed;inset:0;background:#0a0a0a;display:none;align-items:center;justify-content:center;z-index:900;overflow:hidden;}
+#ptc{position:absolute;inset:0;z-index:0;}
+.welcome-inner{position:relative;z-index:1;width:100%;max-width:340px;padding:0 1.4rem;}
+.skip-row{display:flex;justify-content:flex-end;margin-bottom:1rem;}
+.skip-pill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:.35rem .9rem;font-size:.68rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.5);text-transform:uppercase;display:flex;align-items:center;gap:.4rem;}
+.skip-pill i{font-size:.6rem;}
+.welcome-card{background:rgba(18,18,18,.96);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;margin-bottom:1.2rem;}
+.welcome-card-img{width:100%;height:190px;object-fit:cover;display:block;}
+.welcome-card-body{padding:1.4rem 1.4rem 1.6rem;}
+.wc-top{font-size:.58rem;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:.4rem;}
+.wc-title{font-size:1.7rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;line-height:1;margin-bottom:.3rem;}
+.wc-sub{font-size:.68rem;color:rgba(255,255,255,.3);letter-spacing:.5px;margin-bottom:.9rem;}
+.wc-ver{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:6px;padding:.22rem .65rem;font-size:.6rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;}
+.btn-enter{width:100%;padding:1rem;background:#fff;border:none;border-radius:12px;color:#0a0a0a;font-size:.78rem;font-weight:900;letter-spacing:4px;text-transform:uppercase;transition:opacity .15s;}
+.btn-enter:active{opacity:.8;}
+.welcome-footer{text-align:center;font-size:.6rem;color:rgba(255,255,255,.18);letter-spacing:1px;text-transform:uppercase;}
+
+/* ── LOGIN ── */
+#loginPage{position:fixed;inset:0;background:#0a0a0a;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:800;padding:1.5rem;}
+.login-header{text-align:center;margin-bottom:2rem;}
+.login-logo{font-size:1.2rem;font-weight:900;letter-spacing:5px;text-transform:uppercase;margin-bottom:.3rem;}
+.login-sub{font-size:.65rem;color:rgba(255,255,255,.28);letter-spacing:2px;text-transform:uppercase;}
+.login-card{width:100%;max-width:360px;background:rgba(16,16,16,.98);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:2rem 1.8rem;}
+.field-label{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.5rem;display:flex;align-items:center;gap:.45rem;}
+.field-label i{font-size:.65rem;}
+.field-wrap{position:relative;margin-bottom:1.2rem;}
+.field-wrap:last-of-type{margin-bottom:0;}
+.field-ico{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.2);font-size:.78rem;pointer-events:none;}
+.field-input{width:100%;padding:.82rem .9rem .82rem 2.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;}
+.field-input:focus{border-color:rgba(255,255,255,.2);}
+.field-input::placeholder{color:rgba(255,255,255,.18);}
+.field-eye{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.2);font-size:.78rem;}
+.btn-auth{width:100%;padding:.92rem;background:#fff;border:none;border-radius:10px;color:#0a0a0a;font-size:.75rem;font-weight:900;letter-spacing:4px;text-transform:uppercase;margin-top:1.4rem;transition:opacity .15s;}
+.btn-auth:active{opacity:.8;}
+.btn-auth:disabled{opacity:.35;}
+.err-text{color:#ef4444;font-size:.75rem;text-align:center;margin-top:.75rem;min-height:1em;}
+.login-note{text-align:center;font-size:.65rem;color:rgba(255,255,255,.18);margin-top:1rem;}
+.spin-sm{display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,.15);border-top-color:#000;border-radius:50%;animation:spin .55s linear infinite;vertical-align:middle;margin-right:.3rem;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingPage">
+  <div class="load-avatar"><img src="https://files.catbox.moe/ax89lg.jpg" alt="Logo"></div>
+  <div class="load-spinner"></div>
+  <div class="load-name">ASTRO CRM</div>
+  <div class="load-sub">Initializing System</div>
+  <div class="load-progress"><div class="load-bar" id="loadBar"></div></div>
+</div>
+
+<!-- WELCOME -->
+<div id="welcomePage">
+  <canvas id="ptc"></canvas>
+  <div class="welcome-inner">
+    <div class="skip-row">
+      <div class="skip-pill" onclick="goToLogin()">SKIP <i class="fa-solid fa-chevron-right"></i></div>
+    </div>
+    <div class="welcome-card">
+      <img class="welcome-card-img" src="https://files.catbox.moe/ax89lg.jpg" alt="Astro">
+      <div class="welcome-card-body">
+        <div class="wc-top">POWERED BY</div>
+        <div class="wc-title">ASTRO CRM</div>
+        <div class="wc-sub">Premium WhatsApp Tools Platform</div>
+        <div class="wc-ver"><i class="fa-solid fa-tag"></i> VERSION 3.0</div>
+      </div>
+    </div>
+    <button class="btn-enter" onclick="goToLogin()">DASHBOARD</button>
+    <div class="welcome-footer" style="margin-top:.9rem;">Project By JooModdss &copy; 2025 Astro CRM</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-header">
+    <div class="login-logo">ASTRO CRM</div>
+    <div class="login-sub">Please login to your account</div>
+  </div>
+  <div class="login-card">
+    <div class="field-label"><i class="fa-regular fa-user"></i> USERNAME</div>
+    <div class="field-wrap">
+      <i class="fa-regular fa-user field-ico"></i>
+      <input class="field-input" type="text" id="uInput" placeholder="Enter username" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field-label"><i class="fa-solid fa-lock"></i> PASSWORD</div>
+    <div class="field-wrap">
+      <i class="fa-solid fa-lock field-ico"></i>
+      <input class="field-input" type="password" id="pInput" placeholder="••••••••••">
+      <i class="fa-regular fa-eye field-eye" id="eyeBtn" onclick="toggleEye()"></i>
+    </div>
+    <button class="btn-auth" id="authBtn" onclick="doLogin()">AUTHENTICATE</button>
+    <div class="err-text" id="errText"></div>
+    <div class="login-note">No account? Contact admin</div>
+  </div>
+</div>
+
+<script>
+// ── Particles ─────────────────────────────────────────────────
+function startParticles() {
+  const canvas = document.getElementById('ptc');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pts = Array.from({ length: 55 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - .5) * .35,
+    vy: (Math.random() - .5) * .35,
+    r: Math.random() * 1.8 + .6,
+    a: Math.random() * .45 + .1,
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${p.a})`;
+      ctx.fill();
+    });
+    pts.forEach((a, i) => {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = a.x - pts[j].x, dy = a.y - pts[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 110) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = `rgba(255,255,255,${.05 * (1 - d / 110)})`;
+          ctx.lineWidth = .5;
+          ctx.stroke();
+        }
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+}
+
+// ── Device fingerprint ─────────────────────────────────────────
+function getDeviceId() {
+  let id = localStorage.getItem('_did');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+    localStorage.setItem('_did', id);
+  }
+  return id;
+}
+
+function getSaved() {
+  try {
+    const raw = localStorage.getItem('_as');
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (obj.deviceId !== getDeviceId()) return null;
+    if (Date.now() - obj.ts > 24 * 60 * 60 * 1000) return null;
+    return obj;
+  } catch { return null; }
+}
+
+function saveSession(user) {
+  localStorage.setItem('_as', JSON.stringify({ ...user, deviceId: getDeviceId(), ts: Date.now() }));
+}
+
+// ── Loading animation ──────────────────────────────────────────
+function runLoader() {
+  return new Promise(resolve => {
+    const bar = document.getElementById('loadBar');
+    let p = 0;
+    const iv = setInterval(() => {
+      p += Math.random() * 14 + 4;
+      if (p >= 100) { p = 100; bar.style.width = '100%'; clearInterval(iv); setTimeout(resolve, 350); return; }
+      bar.style.width = p + '%';
+    }, 70);
+  });
+}
+
+// ── Page show ─────────────────────────────────────────────────
+function show(id) {
+  ['loadingPage', 'welcomePage', 'loginPage'].forEach(p => {
+    const el = document.getElementById(p);
+    el.style.display = p === id ? 'flex' : 'none';
+  });
+}
+
+function goToLogin() { show('loginPage'); }
+
+// ── Eye toggle ─────────────────────────────────────────────────
+function toggleEye() {
+  const inp = document.getElementById('pInput');
+  const eye = document.getElementById('eyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; eye.className = 'fa-regular fa-eye-slash field-eye'; }
+  else { inp.type = 'password'; eye.className = 'fa-regular fa-eye field-eye'; }
+}
+
+// ── Login ──────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') doLogin();
+});
+
+async function doLogin() {
+  const btn = document.getElementById('authBtn');
+  const err = document.getElementById('errText');
+  const u = document.getElementById('uInput').value.trim();
+  const p = document.getElementById('pInput').value;
+  if (!u || !p) { err.textContent = 'Username dan password wajib diisi'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin-sm"></span>AUTHENTICATING...';
+  err.textContent = '';
+  try {
+    const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+    const d = await res.json();
+    if (d.success) { saveSession(d.user); window.location.href = '/dashboard'; }
+    else { err.textContent = d.message || 'Login gagal'; btn.disabled = false; btn.innerHTML = 'AUTHENTICATE'; }
+  } catch { err.textContent = 'Koneksi gagal'; btn.disabled = false; btn.innerHTML = 'AUTHENTICATE'; }
+}
+
+// ── Init ───────────────────────────────────────────────────────
+(async () => {
+  show('loadingPage');
+  await runLoader();
+
+  const saved = getSaved();
+  if (saved) {
+    try {
+      const r = await fetch('/api/session');
+      const d = await r.json();
+      if (d.loggedIn) { window.location.href = '/dashboard'; return; }
+    } catch {}
+    localStorage.removeItem('_as');
+  }
+
+  const welcomed = sessionStorage.getItem('_w');
+  if (!welcomed) {
+    sessionStorage.setItem('_w', '1');
+    show('welcomePage');
+    startParticles();
+    setTimeout(() => goToLogin(), 6000);
+  } else {
+    show('loginPage');
+  }
+})();
+</script>
+</body>
+</html>
